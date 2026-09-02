@@ -1,0 +1,1 @@
+ALTER TABLE public.task_boards ADD COLUMN IF NOT EXISTS equipe text NOT NULL DEFAULT '';

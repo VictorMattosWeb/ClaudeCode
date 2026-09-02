@@ -1,0 +1,51 @@
+-- =============================================================================
+-- REMOÇÃO DAS TABELAS DE ESTOQUE E RDO  —  NÃO APLICADA
+-- =============================================================================
+--
+-- O código da aplicação já não usa nenhuma destas tabelas. Este arquivo está
+-- DESATIVADO de propósito (extensão .disabled), porque a operação é
+-- IRREVERSÍVEL e apaga dados reais de produção.
+--
+-- ANTES DE APLICAR:
+--   1. Faça backup:   supabase db dump -f backup_antes_drop.sql
+--   2. Confira o volume do que será perdido:
+--        SELECT 'stock_items' t, count(*) FROM public.stock_items
+--        UNION ALL SELECT 'stock_movements', count(*) FROM public.stock_movements
+--        UNION ALL SELECT 'rdo_dias', count(*) FROM public.rdo_dias
+--        UNION ALL SELECT 'rdo_grupos', count(*) FROM public.rdo_grupos
+--        UNION ALL SELECT 'rdo_config', count(*) FROM public.rdo_config;
+--   3. Renomeie para  <timestamp>_remover_estoque_rdo.sql  e remova os comentários.
+--   4. supabase db push
+--
+-- ALTERNATIVA MENOS DEFINITIVA (recomendada como primeiro passo):
+--   mover as tabelas para um schema de arquivo em vez de apagar —
+--     CREATE SCHEMA IF NOT EXISTS arquivo_morto;
+--     ALTER TABLE public.stock_items SET SCHEMA arquivo_morto;
+--     (idem para as demais)
+--   Isso as tira do PostgREST/API sem destruir nada e permite voltar atrás.
+-- =============================================================================
+
+-- -- Ordem importa: filhas antes das mães, por causa das foreign keys.
+--
+-- DROP TABLE IF EXISTS public.stock_movements CASCADE;
+-- DROP TABLE IF EXISTS public.stock_items CASCADE;
+-- DROP TABLE IF EXISTS public.stock_identifier_counters CASCADE;
+--
+-- DROP TABLE IF EXISTS public.rdo_dias CASCADE;
+-- DROP TABLE IF EXISTS public.rdo_grupos CASCADE;
+-- DROP TABLE IF EXISTS public.rdo_config CASCADE;
+--
+-- -- Limpeza das permissões órfãs dos módulos removidos.
+-- DELETE FROM public.user_permissions WHERE module IN ('estoque', 'rdo');
+-- DELETE FROM public.role_permissions WHERE module IN ('estoque', 'rdo');
+--
+-- -- Solicitações de exclusão históricas do módulo estoque: a UI já as exibe com
+-- -- rótulo genérico. Apague apenas se não precisar do registro de auditoria.
+-- -- DELETE FROM public.solicitacoes_exclusao WHERE tipo = 'estoque';
+--
+-- -- Tarefas que apontavam para o módulo estoque passam a "geral".
+-- UPDATE public.tasks SET modulo_relacionado = 'geral' WHERE modulo_relacionado = 'estoque';
+--
+-- -- Os valores 'estoque' e 'rdo' nos enums (app_module, delete_item_type,
+-- -- task_modulo) foram deixados de propósito: o PostgreSQL não permite remover
+-- -- um valor de enum sem recriar o tipo, e o código já tolera valores legados.

@@ -1,0 +1,4 @@
+project_id = "vkzoraknftfslptacfwy"
+
+[functions.notifications-integration]
+verify_jwt = true

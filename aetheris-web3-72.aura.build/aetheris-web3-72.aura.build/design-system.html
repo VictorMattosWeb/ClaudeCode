@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="antialiased">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AETHERIS | Blockchain Layer 1 Escalável e Protocolo DAG</title>
+<meta name="description" content="Aetheris é o blockchain Layer 1 de nova geração que utiliza consenso DAG para escalabilidade infinita, finalidade instantânea e privacidade zero-knowledge. O futuro do DeFi e da Web3."/>
+<meta name="preview-ready-after-ms" content="5000"/>
+
+<!-- fonts: Inter (display/body) + JetBrains Mono (HUD / status / mono labels) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="assets/d083fc509b581c53_css2.css" rel="stylesheet"/>
+
+<!-- tailwind runtime: must stay in head; reads window.tailwind.config defined right after -->
+<script src="assets/176e894661aa9cdc_3.4.17"></script>
+
+<!-- tailwind theme extension: void/panel/mint palette, Inter+JetBrains Mono, tech-grid bg, tightest tracking -->
+<script src="assets/js/tailwind-config.js"></script>
+
+<!-- css: custom design tokens — preloader, scrollbar theme, text-stroke headlines, hover-card surfaces, scan line, tech separator, 12-ring digital singularity tunnel, cms shimmer placeholders, scroll/pin fixes -->
+<link rel="stylesheet" href="assets/css/design-system.css"/>
+
+<!-- unicorn studio engine: WebGL/Three-driven typographic scene used as the hero "AETHERIS" backdrop -->
+<script src="assets/12bba01dacadcd57_unicornStudio.umd.js"></script>
+</head>
+
+<body class="font-body bg-tech-grid grid-bg selection:bg-mint selection:text-void">
+
+<!-- preloader -->
+<div aria-label="Carregando o site" class="preloader" id="preloader" role="status">
+<div class="text-center px-6">
+<div class="font-display text-3xl md:text-4xl font-semibold mb-2 tracking-tighter">INICIALIZANDO</div>
+<div class="w-48 h-1 bg-gray-800 mx-auto overflow-hidden">
+<div class="h-full bg-mint w-0" id="loader-bar"></div>
+</div>
+<div class="font-mono text-[10px] text-mint mt-2 tracking-widest">ESTABELECENDO CONEXÃO...</div>
+</div>
+</div>
+
+<!-- hud-overlay -->
+<div aria-hidden="true" class="fixed inset-0 pointer-events-none z-40 p-4 hidden md:block">
+<div class="absolute top-4 left-4 w-2 h-2 border-t border-l border-white/50"></div>
+<div class="absolute top-4 right-4 w-2 h-2 border-t border-r border-white/50"></div>
+<div class="absolute bottom-4 left-4 w-2 h-2 border-b border-l border-white/50"></div>
+<div class="absolute bottom-4 right-4 w-2 h-2 border-b border-r border-white/50"></div>
+</div>
+
+<!-- nav -->
+<nav aria-label="Navegação principal" class="fixed w-full z-50 top-0 border-b border-border bg-void/90 backdrop-blur-xl">
+<div class="flex h-16 max-w-[1920px] mx-auto px-6 md:px-12 items-center justify-between">
+<a aria-label="Página inicial Aetheris" class="flex items-center gap-2 group shrink-0" href="#">
+<span class="text-lg font-semibold tracking-tight font-display">AETHERIS</span>
+</a>
+<div class="hidden lg:flex items-center border-x border-border h-full px-8">
+<a class="uppercase text-sub hover:text-mint transition-colors text-xs font-semibold tracking-wide pt-2 pr-6 pb-2 pl-6" href="#">Sobre</a>
+<a class="uppercase text-sub hover:text-mint transition-colors text-xs font-semibold tracking-wide pt-2 pr-6 pb-2 pl-6" href="#">Tokenomics</a>
+<a class="uppercase text-sub hover:text-mint transition-colors text-xs font-semibold tracking-wide pt-2 pr-6 pb-2 pl-6" href="#">Roadmap</a>
+<a class="uppercase text-sub hover:text-mint transition-colors text-xs font-semibold tracking-wide pt-2 pr-6 pb-2 pl-6" href="#">Staking</a>
+<a class="uppercase text-sub hover:text-mint transition-colors text-xs font-semibold tracking-wide pt-2 pr-6 pb-2 pl-6" href="#">Blog</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2 text-[10px] font-mono text-mint">
+<span class="w-1.5 h-1.5 bg-mint rounded-full animate-pulse"></span>
+GÁS: 4 GWEI
+</div>
+<button class="bg-white text-void px-4 md:px-6 py-2 text-xs font-semibold uppercase hover:bg-mint transition-colors whitespace-nowrap">Conectar</button>
+</div>
+</div>
+</nav>
+
+<!-- hero -->
+<header class="relative w-full h-screen min-h-[600px] bg-void overflow-hidden flex flex-col items-center justify-end pb-24 md:pb-32">
+<div class="absolute top-0 left-0 w-full h-[65vh] z-0 pointer-events-none">
+<div data-us-project="7zydvovZReD8YsoiUwj3" style="width:100%; height:100%;"></div>
+<div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-void via-void/80 to-transparent z-10"></div>
+</div>
+<div class="relative z-20 flex flex-col items-center w-full max-w-[1920px] px-6 text-center">
+<div class="flex flex-col items-center justify-center w-full">
+<h1 class="font-display text-4xl md:text-7xl font-semibold text-white tracking-tightest leading-none relative z-20 mix-blend-lighten">INFINITA</h1>
+<div class="h-2 md:h-4"></div>
+<div aria-label="ESCALABILIDADE" class="font-display text-[13vw] leading-[0.85] font-semibold tracking-tighter text-transparent z-10 select-none pointer-events-none text-stroke opacity-90 transition-opacity">ESCALABILIDADE</div>
+</div>
+<p class="max-w-xl text-center text-gray-400 text-sm md:text-lg font-medium leading-relaxed mt-6 mb-8 hero-anim opacity-0 translate-y-4">A primeira arquitetura híbrida DAG-Blockchain do mundo. Finalidade instantânea, privacidade zero-knowledge e segurança quântico-resistente.</p>
+<div class="flex flex-col md:flex-row gap-4 w-full md:w-auto hero-anim opacity-0 translate-y-4">
+<button class="group bg-mint text-void px-10 py-3 text-xs font-semibold uppercase tracking-wide hover:bg-white transition-all hover:scale-[1.02] min-w-[180px] text-center shadow-[0_0_20px_rgba(0,255,163,0.3)]">Começar a Construir</button>
+<button class="group bg-void/50 backdrop-blur-md border border-white/20 text-white px-10 py-3 text-xs font-semibold uppercase tracking-wide hover:bg-white/10 transition-all hover:border-white/40 min-w-[180px] text-center">Ler Whitepaper</button>
+</div>
+</div>
+</header>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- partners -->
+<section aria-label="Parceiros de Confiança" class="border-b border-border bg-void">
+<div class="max-w-[1920px] mx-auto grid grid-cols-2 md:grid-cols-6 divide-x divide-y md:divide-y-0 divide-border">
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">BINANCE</span></div>
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">COINBASE</span></div>
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">SEQUOIA</span></div>
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">a16z</span></div>
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">POLYCHAIN</span></div>
+<div class="p-6 md:p-10 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-50 hover:opacity-100"><span class="font-display font-semibold text-lg md:text-xl tracking-tight">PANTERA</span></div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- core-features -->
+<section aria-label="Recursos do Protocolo" class="py-16 md:py-24 relative" id="features">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-12 flex items-end justify-between reveal">
+<div>
+<h2 class="font-display text-3xl md:text-4xl font-semibold mb-2 tracking-tight">Arquitetura Central</h2>
+<p class="text-sub text-sm md:text-base max-w-md">Construído sobre o Protocolo Trinity, combinando velocidade, segurança e escalabilidade.</p>
+</div>
+<div class="hidden md:block text-right"><div class="font-mono text-[10px] text-mint">SYS_ARCH_V2</div></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-0 border border-border">
+<article class="group border-b md:border-b-0 md:border-r border-border p-6 md:p-8 hover-card bg-panel reveal">
+<div class="w-10 h-10 bg-void border border-border flex items-center justify-center mb-6 text-mint">
+<iconify-icon height="24" icon="solar:bolt-linear" width="24"></iconify-icon>
+</div>
+<h3 class="font-display text-xl font-semibold mb-3 tracking-tight">Hiper-Throughput</h3>
+<p class="text-sm md:text-base text-sub leading-relaxed mb-4">Processamento paralelo de transações via estrutura DAG, permitindo 150k+ TPS na mainnet.</p>
+</article>
+<article class="group border-b md:border-b-0 md:border-r border-border p-6 md:p-8 hover-card bg-panel reveal">
+<div class="w-10 h-10 bg-void border border-border flex items-center justify-center mb-6 text-mint">
+<iconify-icon height="24" icon="solar:shield-check-linear" width="24"></iconify-icon>
+</div>
+<h3 class="font-display text-xl font-semibold mb-3 tracking-tight">Camada de Privacidade ZK</h3>
+<p class="text-sm md:text-base text-sub leading-relaxed mb-4">Provas Zero-Knowledge nativas para privacidade transacional opcional e conformidade regulatória.</p>
+</article>
+<article class="group border-b md:border-b-0 border-border p-6 md:p-8 hover-card bg-panel reveal">
+<div class="w-10 h-10 bg-void border border-border flex items-center justify-center mb-6 text-mint">
+<iconify-icon height="24" icon="solar:global-linear" width="24"></iconify-icon>
+</div>
+<h3 class="font-display text-xl font-semibold mb-3 tracking-tight">Interoperabilidade</h3>
+<p class="text-sm md:text-base text-sub leading-relaxed mb-4">Pontes nativas para Ethereum, Solana e Cosmos via o Aetheris Nexus.</p>
+</article>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- tokenomics -->
+<section aria-label="Tokenomics" class="grid grid-cols-1 md:grid-cols-2" id="token">
+<div class="bg-panel p-8 md:p-24 border-b md:border-b-0 md:border-r border-border flex flex-col justify-center items-center relative overflow-hidden reveal order-2 md:order-1">
+<div class="relative w-56 h-56 md:w-64 md:h-64">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 100 100"><circle cx="50" cy="50" fill="none" r="45" stroke="#1a1a1a" stroke-width="8"/><circle class="token-chart-ring" cx="50" cy="50" fill="none" r="45" stroke="#00ffa3" stroke-dasharray="283" stroke-dashoffset="283" stroke-width="8"/></svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl md:text-4xl font-semibold text-white">1B</span>
+<span class="text-xs text-sub uppercase tracking-wider">Suprimento Total</span>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-8 text-center w-full max-w-sm">
+<div>
+<div class="text-xl md:text-2xl font-semibold text-white">$<span class="token-stat-number" data-target="452">0</span>M</div>
+<div class="text-[10px] text-sub uppercase">Capitalização</div>
+</div>
+<div>
+<div class="text-xl md:text-2xl font-semibold text-mint"><span class="token-stat-number" data-target="12.5">0</span>%</div>
+<div class="text-[10px] text-sub uppercase">APY de Staking</div>
+</div>
+</div>
+</div>
+<div class="bg-void p-8 md:p-24 flex flex-col justify-center reveal order-1 md:order-2">
+<h3 class="font-display text-2xl md:text-3xl font-semibold mb-8 tracking-tight">Utilidade do Token ($ATH)</h3>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-mint font-semibold font-mono shrink-0">1</div>
+<div>
+<h4 class="font-semibold text-white text-lg">Taxas de Rede</h4>
+<p class="text-sm md:text-base text-sub">Usado para pagar transações e execução de smart contracts em toda a rede.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-mint font-semibold font-mono shrink-0">2</div>
+<div>
+<h4 class="font-semibold text-white text-lg">Governança</h4>
+<p class="text-sm md:text-base text-sub">Vote em atualizações do protocolo, alocação do tesouro e ajustes de parâmetros.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-mint font-semibold font-mono shrink-0">3</div>
+<div>
+<h4 class="font-semibold text-white text-lg">Staking de Validador</h4>
+<p class="text-sm md:text-base text-sub">Garanta a segurança da rede delegando para validadores e recebendo rendimento.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- roadmap -->
+<section aria-label="Roadmap de Desenvolvimento" class="py-16 md:py-24 bg-void" id="roadmap">
+<div class="max-w-6xl mx-auto px-6">
+<div class="flex flex-col md:flex-row gap-12 md:gap-16">
+<div class="md:w-1/3 reveal">
+<div class="inline-block px-3 py-1 border border-border bg-white/5 rounded-full mb-6">
+<span class="text-[10px] font-mono text-mint uppercase tracking-widest">Log de Execução</span>
+</div>
+<h2 class="font-display text-3xl md:text-4xl font-semibold mb-4 tracking-tight">Roadmap<br/>Estratégico</h2>
+<p class="text-sub text-sm md:text-base leading-relaxed mb-8">A Aetheris é implantada em fases sequenciais para garantir estabilidade e segurança da rede. Estamos atualmente na Fase 2.</p>
+</div>
+<div class="md:w-2/3 space-y-0 relative border-l border-border ml-2 md:ml-0">
+<div class="relative pl-8 md:pl-10 pb-12 reveal group">
+<div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-mint rounded-full shadow-[0_0_10px_#00ffa3]"></div>
+<div class="border border-border bg-panel/50 p-6 hover:bg-panel transition-colors">
+<h3 class="font-semibold text-lg text-white mb-2">Gênese &amp; Fundação</h3>
+<p class="text-xs text-sub">Mainnet Alpha, TGE e Auditorias concluídos.</p>
+</div>
+</div>
+<div class="relative pl-8 md:pl-10 pb-12 reveal group">
+<div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-white border-2 border-void"></div>
+<div class="absolute -left-[9px] top-1 w-4 h-4 border border-mint rounded-full animate-ping opacity-50"></div>
+<div class="border border-mint/30 bg-mint/5 p-6 relative overflow-hidden">
+<div class="flex justify-between items-start mb-2 relative z-10">
+<span class="font-mono text-xs text-white">FASE 02 — EM ANDAMENTO</span>
+<span class="text-[9px] bg-mint text-void px-2 py-0.5 font-bold rounded">AO VIVO</span>
+</div>
+<h3 class="font-semibold text-lg text-white mb-4 relative z-10">Expansão do Ecossistema</h3>
+<p class="text-xs text-white/70">Lançando a DEX Aetheris, Carteira Mobile e DAO de Governança.</p>
+</div>
+</div>
+<div class="relative pl-8 md:pl-10 reveal group">
+<div class="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-panel border border-sub"></div>
+<div class="border border-border border-dashed bg-transparent p-6 opacity-60 hover:opacity-100 transition-opacity">
+<h3 class="font-semibold text-lg text-gray-400 mb-2">Soberania Global</h3>
+<p class="text-xs text-sub">Descentralização total do sequenciador e integração com satélites.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- network-infrastructure -->
+<section aria-label="Estatísticas Globais da Rede" class="py-16 md:py-24 bg-void" id="network">
+<div class="max-w-[1920px] mx-auto px-6">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="lg:col-span-8 border border-border bg-panel p-2 relative overflow-hidden reveal min-h-[400px] md:min-h-[500px]">
+<div class="absolute inset-0 z-0">
+<img alt="Rede global descentralizada de servidores e nós validadores" class="w-full h-full object-cover opacity-40 grayscale brightness-75 contrast-125" src="assets/4234be1fbe0b3ff7_3e590790-e144-4deb-9989-37794b.webp"/>
+</div>
+<div class="scan-line z-10 pointer-events-none"></div>
+<div class="relative z-20 p-6 md:p-8 flex flex-col justify-between h-full">
+<div class="flex justify-between items-start">
+<div class="bg-void/80 backdrop-blur-md p-4 border border-border">
+<h2 class="font-display text-xl md:text-2xl font-semibold mb-1 text-white tracking-tight">Topologia ao Vivo</h2>
+<p class="text-sub text-[10px] font-mono">STATUS: SINCRONIZADO</p>
+</div>
+<div class="flex gap-2">
+<div class="w-2 h-2 bg-mint rounded-full animate-pulse"></div>
+<div class="font-mono text-[10px] text-mint hidden md:block">CONEXÃO ATIVA</div>
+</div>
+</div>
+<div class="absolute top-[30%] left-[20%] w-20 h-20 md:w-32 md:h-32 border border-mint/20 rounded-full flex items-center justify-center animate-pulse">
+<div class="w-1 h-1 bg-mint rounded-full"></div>
+</div>
+<div class="absolute bottom-[20%] right-[30%] w-16 h-16 md:w-24 md:h-24 border border-mint/10 rounded-full flex items-center justify-center animate-pulse delay-700">
+<div class="w-1 h-1 bg-mint rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-void border border-border p-6 reveal h-full flex flex-col justify-center">
+<h3 class="font-semibold text-white mb-6 text-sm uppercase flex items-center gap-2">
+<span class="w-2 h-2 bg-mint rounded-sm"></span>
+Saúde da Rede
+</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center p-3 bg-panel border border-border">
+<span class="text-xs text-sub">Validadores Ativos</span>
+<span class="font-mono text-white font-semibold">4.120</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-panel border border-border">
+<span class="text-xs text-sub">Latência Global</span>
+<span class="font-mono text-mint font-semibold">12ms</span>
+</div>
+<div class="flex justify-between items-center p-3 bg-panel border border-border">
+<span class="text-xs text-sub">Total em Staking</span>
+<span class="font-mono text-white font-semibold">450M ATH</span>
+</div>
+</div>
+<div class="mt-8">
+<div class="text-[10px] text-sub mb-2 uppercase">Distribuição por Região</div>
+<div class="flex gap-1 h-2 w-full">
+<div class="h-full bg-mint w-[40%]"></div>
+<div class="h-full bg-mint/70 w-[30%]"></div>
+<div class="h-full bg-mint/40 w-[20%]"></div>
+<div class="h-full bg-mint/20 w-[10%]"></div>
+</div>
+<div class="flex justify-between text-[9px] text-gray-600 mt-1 font-mono">
+<span>NA</span>
+<span>EU</span>
+<span>ÁSIA</span>
+<span>SA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- digital-singularity -->
+<section aria-label="Animação de Escalabilidade Infinita" class="py-24 md:py-32 bg-panel relative overflow-hidden flex flex-col items-center justify-center h-[70vh] md:h-[90vh]">
+<div class="absolute inset-0 opacity-10 bg-[url(assets/cba83117577964aa_aa933a24-d4de-4c67-83f6-b8676b.webp)] bg-cover bg-center"></div>
+<div class="singularity-wrapper">
+<div class="tunnel-ring w-[100px] h-[100px]"></div>
+<div class="tunnel-ring w-[200px] h-[200px]"></div>
+<div class="tunnel-ring w-[300px] h-[300px]"></div>
+<div class="tunnel-ring w-[400px] h-[400px]"></div>
+<div class="tunnel-ring w-[500px] h-[500px]"></div>
+<div class="tunnel-ring w-[600px] h-[600px]"></div>
+<div class="tunnel-ring w-[700px] h-[700px]"></div>
+<div class="tunnel-ring w-[800px] h-[800px]"></div>
+<div class="tunnel-ring w-[900px] h-[900px]"></div>
+<div class="tunnel-ring w-[1000px] h-[1000px]"></div>
+<div class="tunnel-ring w-[1200px] h-[1200px]"></div>
+</div>
+<div class="relative z-10 text-center reveal pointer-events-none px-6">
+<span class="text-mint font-mono text-[9px] md:text-[10px] tracking-[0.3em] md:tracking-[0.5em] uppercase bg-black/50 backdrop-blur-md px-4 py-1 rounded-full border border-mint/20">A Singularidade</span>
+<h2 class="font-display text-4xl md:text-8xl font-bold mt-6 text-white mix-blend-difference tracking-tight">ESCALA INFINITA</h2>
+<p class="text-gray-400 text-sm md:text-base max-w-md mx-auto mt-6 bg-black/30 backdrop-blur-sm p-4 rounded-lg border border-white/5">Um mecanismo de consenso que fica mais rápido conforme a rede cresce. Quanto mais uso, maior o throughput.</p>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- vision -->
+<section aria-label="Declaração de Missão" class="pt-16 md:pt-24 pb-16 md:pb-24" id="vision">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row gap-8 md:gap-12 mb-16 items-center">
+<div class="md:w-1/2 reveal">
+<div class="inline-block px-3 py-1 border border-border bg-white/5 rounded-full mb-6">
+<span class="text-[10px] font-mono text-mint uppercase tracking-widest">Nosso Mandato</span>
+</div>
+<h2 class="font-display text-3xl md:text-4xl font-semibold mb-4 tracking-tight">Profecia &amp; Propósito</h2>
+<p class="text-sub text-sm md:text-base leading-relaxed mb-6">A Aetheris nasceu de uma visão de verdadeira autonomia digital. Acreditamos em um futuro em que o valor é trocado livremente, com segurança e sem intermediários, empoderando indivíduos e fomentando a inovação global.</p>
+<p class="text-sub text-sm md:text-base leading-relaxed">Nosso protocolo não é apenas um avanço técnico; é uma camada fundacional para uma nova era de aplicações descentralizadas, identidades digitais e economias soberanas.</p>
+</div>
+<div class="md:w-1/2 reveal">
+<img alt="Rede neural digital abstrata e malha de conectividade blockchain" class="w-full h-auto object-cover rounded-xl border border-border shadow-xl grayscale hover:grayscale-0 transition-all duration-500" src="assets/1f6411fd90d62bf0_fa050e23-c777-40ee-aabe-cc7626.jpg"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 border border-border p-6 md:p-8 bg-panel reveal">
+<div class="space-y-6 text-sub text-sm md:text-base leading-relaxed border-b md:border-b-0 md:border-r border-border pb-8 md:pb-0 md:pr-8">
+<p>A infraestrutura atual da internet, embora transformadora, tornou-se centralizada e propensa a silos de dados, censura e controle por algumas entidades dominantes. Nossa missão é desmontar essas barreiras, construindo um novo bem público que seja resiliente, justo e acessível a todos. Somos arquitetos da liberdade digital.</p>
+<ul class="space-y-2 pl-4 border-l border-mint/30">
+<li class="flex items-start gap-2 text-white"><span class="text-mint text-lg leading-none">•</span> <strong>Fundação Descentralizada:</strong> Sem ponto único de falha, verdadeiramente de propriedade da comunidade.</li>
+<li class="flex items-start gap-2 text-white"><span class="text-mint text-lg leading-none">•</span> <strong>Acesso Inclusivo:</strong> Reduzindo barreiras para desenvolvedores e usuários globalmente.</li>
+<li class="flex items-start gap-2 text-white"><span class="text-mint text-lg leading-none">•</span> <strong>Catalisador de Inovação:</strong> Fornecendo ferramentas para aplicações Web3 de próxima geração.</li>
+</ul>
+</div>
+<div class="space-y-6 text-sub text-sm md:text-base leading-relaxed md:pl-8">
+<img alt="Chip processador quântico para criptografia" class="w-full h-auto object-cover rounded-md border border-border shadow-md grayscale hover:grayscale-0 transition-all duration-500" src="assets/e9f1e354165fadfb_89dadee1-b89d-415a-a6c9-b3d012.jpg"/>
+<p>Cada linha de código, cada decisão de design e cada iniciativa da comunidade é guiada por essa filosofia abrangente. Vislumbramos um futuro em que a Aetheris não é apenas uma plataforma, mas um sistema operacional global para um mundo digital mais equitativo e aberto.</p>
+<a class="text-mint text-sm font-semibold uppercase tracking-widest flex items-center gap-2 hover:underline" href="#" rel="noopener">Explore Nosso Manifesto <span class="text-lg">→</span></a>
+</div>
+</div>
+</div>
+</section>
+<div aria-hidden="true" class="tech-separator"></div>
+
+<!-- community-cta -->
+<section aria-label="Junte-se à Comunidade" class="overflow-hidden group pt-24 pb-24 md:pt-32 md:pb-32 relative">
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(0,255,163,0.15),_transparent_70%)] opacity-50"></div>
+<div class="opacity-30 absolute top-0 right-0 bottom-0 left-0"></div>
+<div class="max-w-4xl mx-auto text-center px-6 relative z-10 reveal">
+<h2 class="font-display text-4xl md:text-7xl font-bold uppercase tracking-tighter mb-8 text-white">Junte-se à <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-mint">Revolução</span></h2>
+<p class="font-mono text-sm md:text-base text-gray-400 mb-10 max-w-lg mx-auto">&gt; Governança ativa.<br/>&gt; Faça parte do consenso.<br/>&gt; Reivindique sua soberania.</p>
+<div class="flex flex-col md:flex-row justify-center gap-4">
+<button class="bg-mint text-void px-10 py-4 font-semibold uppercase hover:shadow-[0_0_20px_rgba(0,255,163,0.5)] transition-shadow">Entre no Discord</button>
+<button class="bg-transparent border border-white/20 text-white px-10 py-4 font-semibold uppercase hover:bg-white/10 transition-colors">Siga no X</button>
+</div>
+</div>
+</section>
+
+<!-- footer -->
+<footer class="border-border reveal border-t pt-16 md:pt-20 pb-10">
+<div class="max-w-[1920px] mx-auto px-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-20">
+<div class="col-span-2 md:col-span-1">
+<div class="flex gap-2 mb-4 items-center"><span class="text-lg font-medium text-white font-display">Aetheris</span></div>
+<p class="text-sub text-xs leading-relaxed max-w-xs">Arquitetando a camada invisível de confiança para a próxima geração de aplicações descentralizadas.</p>
+</div>
+<div>
+<h5 class="text-white font-medium text-sm mb-4">Ecossistema</h5>
+<ul class="space-y-2.5 text-xs text-sub">
+<li><a class="hover:text-mint transition-colors" href="#">Explorador de Blocos</a></li>
+<li><a class="hover:text-mint transition-colors" href="#">Fórum de Governança</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-medium text-sm mb-4">Desenvolvedores</h5>
+<ul class="space-y-2.5 text-xs text-sub">
+<li><a class="hover:text-mint transition-colors" href="#">Documentação</a></li>
+<li><a class="hover:text-mint transition-colors" href="#">Github</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-medium text-sm mb-4">Social</h5>
+<div class="flex gap-4">
+<a aria-label="X (Twitter)" class="w-8 h-8 flex items-center justify-center text-sub hover:text-white transition-colors rounded-full border border-white/5 hover:border-white/20" href="#"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+<a aria-label="GitHub" class="w-8 h-8 flex items-center justify-center text-sub hover:text-white transition-colors rounded-full border border-white/5 hover:border-white/20" href="#"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+<a aria-label="Discord" class="w-8 h-8 flex items-center justify-center text-sub hover:text-white transition-colors rounded-full border border-white/5 hover:border-white/20" href="#"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></a>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border">
+<p class="text-[10px] text-sub uppercase tracking-wider">© 2024 Aetheris Foundation. Todos os direitos reservados.</p>
+<div class="flex items-center gap-2 mt-4 md:mt-0">
+<div class="w-1.5 h-1.5 rounded-full bg-mint shadow-[0_0_8px_rgba(102,224,163,0.8)] animate-pulse"></div>
+<span class="font-mono text-[10px] text-mint uppercase tracking-widest">Sistema Operacional</span>
+</div>
+</div>
+</div>
+</footer>
+
+<!-- iconify web component runtime: renders <iconify-icon icon="solar:..."/> tags in the Core Architecture cards -->
+<script src="assets/851bed7af266f96a_iconify-icon.min.js"></script>
+
+<!-- three.js: WebGL engine bundled because Unicorn Studio depends on it -->
+<script src="assets/9274bbcec8d96168_three.min.js"></script>
+
+<!-- gsap + ScrollTrigger: drives preloader exit, hero/section reveals, token chart stroke animation, and stat count-ups -->
+<script src="assets/efc85c7eb1418197_gsap.min.js"></script>
+<script src="assets/65f6c13748b0c8d8_ScrollTrigger.min.js"></script>
+
+<!-- lenis: smooth-scroll wrapper used in interactions.js -->
+<script src="assets/0ef869066c4bbe61_lenis.min.js"></script>
+
+<!-- bootstraps the Unicorn Studio scene that paints the AETHERIS hero typographic background -->
+<script src="assets/js/unicorn-studio-init.js"></script>
+
+<!-- preloader fake-progress, GSAP/ScrollTrigger reveals, token ring + count-up, Lenis smooth scroll -->
+<script src="assets/js/interactions.js"></script>
+
+</body>
+</html>

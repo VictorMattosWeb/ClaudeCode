@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.user_can_access_task(uuid) TO authenticated, anon;

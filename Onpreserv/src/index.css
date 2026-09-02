@@ -1,0 +1,534 @@
+/* Inter (display + body) e JetBrains Mono (HUD, status, rótulos) — exatamente
+   as duas famílias do Aetheris. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+   onPreserv — Sistema de design AETHERIS
+   -----------------------------------------------------------------------------
+   Fidelidade literal ao design de referência `aetheris-web3-72`:
+
+     void          #030303      panel   #080808
+     mint          #00ffa3      mint-dark #00b372
+     border        rgba(255,255,255,0.08)
+     border-strong rgba(255,255,255,0.15)
+     sub           #888888      texto   #e0e0e0
+     raio          0            (nada arredondado — arestas retas)
+     tipografia    Inter (display/body) + JetBrains Mono (HUD)
+     grid          50px, linhas em rgba(255,255,255,0.03)
+     curva         cubic-bezier(0.16, 1, 0.3, 1)
+
+   Os valores hex acima estão convertidos para HSL porque o shadcn/ui exige
+   canais crus nos tokens; os comentários guardam o hex de origem.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* --- Superfícies -------------------------------------------------- */
+    --background: 0 0% 1.2%;      /* #030303 void  */
+    --foreground: 0 0% 88%;       /* #e0e0e0       */
+    --card: 0 0% 3.1%;            /* #080808 panel */
+    --card-foreground: 0 0% 88%;
+    --popover: 0 0% 3.1%;
+    --popover-foreground: 0 0% 88%;
+
+    /* --- Mint ---------------------------------------------------------- */
+    --primary: 158 100% 50%;      /* #00ffa3 */
+    --primary-foreground: 0 0% 1.2%;
+    --primary-soft: 158 100% 5%;
+    --primary-muted: 158 100% 35%; /* #00b372 */
+
+    /* --- Neutros ------------------------------------------------------- */
+    --secondary: 0 0% 6%;
+    --secondary-foreground: 0 0% 88%;
+    --muted: 0 0% 6%;
+    --muted-foreground: 0 0% 53%; /* #888888 sub */
+    --accent: 0 0% 9%;
+    --accent-foreground: 158 100% 50%;
+
+    /* --- Semântica ----------------------------------------------------- */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 158 100% 50%;
+    --success-foreground: 0 0% 1.2%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 1.2%;
+    --info: 199 89% 55%;
+    --info-foreground: 0 0% 1.2%;
+
+    /* --- Linhas e foco -------------------------------------------------- */
+    --border: 0 0% 9%;            /* rgba(255,255,255,0.08) sobre o void */
+    --border-strong: 0 0% 16%;    /* rgba(255,255,255,0.15) sobre o void */
+    --input: 0 0% 9%;
+    --ring: 158 100% 50%;
+
+    /* Aetheris não arredonda nada. Zero é a decisão, não um descuido. */
+    --radius: 0rem;
+
+    /* --- Sidebar ------------------------------------------------------- */
+    --sidebar-background: 0 0% 1.2%;
+    --sidebar-foreground: 0 0% 53%;
+    --sidebar-primary: 158 100% 50%;
+    --sidebar-primary-foreground: 0 0% 1.2%;
+    --sidebar-accent: 0 0% 5%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 9%;
+    --sidebar-ring: 158 100% 50%;
+
+    /* --- Elevação: no Aetheris a profundidade é halo mint, não sombra --- */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.6);
+    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.8);
+    --shadow-md: 0 8px 28px -8px hsl(0 0% 0% / 0.9);
+    --shadow-lg: 0 24px 64px -16px hsl(0 0% 0% / 0.95);
+    --glow-mint: 0 0 20px hsl(158 100% 50% / 0.3);
+    --glow-mint-strong: 0 0 32px hsl(158 100% 50% / 0.45);
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dark { color-scheme: dark; }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* O grid técnico é do corpo, como no Aetheris — está em toda a aplicação. */
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      linear-gradient(to right, hsl(0 0% 100% / 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 100% / 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.04em;   /* tracking-tightest do Aetheris */
+    font-weight: 600;
+  }
+
+  /* Scrollbar do Aetheris: 5px, trilho void, polegar #333, hover mint. */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #030303; }
+  ::-webkit-scrollbar-thumb { background: #333; }
+  ::-webkit-scrollbar-thumb:hover { background: #00ffa3; }
+
+  ::selection { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+
+  :focus-visible {
+    outline: 1px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Cursor de texto no mint. */
+  input, textarea, select { caret-color: hsl(var(--primary)); }
+
+  /* O autofill do Chrome pinta o campo de azul claro com texto preto — o que
+     destrói o tema escuro. Não há como sobrescrever `background-color` nesse
+     estado, então a superfície é reconstruída com uma sombra interna sólida. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #030303 inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--primary)) !important;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+/* =============================================================================
+   Utilitários do Aetheris
+   ========================================================================== */
+@layer utilities {
+  .shadow-xs { box-shadow: var(--shadow-xs); }
+  .shadow-card { box-shadow: var(--shadow-sm); }
+  .shadow-elevated { box-shadow: var(--shadow-md); }
+  .shadow-floating { box-shadow: var(--shadow-lg); }
+  .shadow-glow { box-shadow: var(--glow-mint); }
+  .shadow-glow-strong { box-shadow: var(--glow-mint-strong); }
+
+  .grid-bg { background-size: 50px 50px; }
+
+  /* Headline vazado do hero. */
+  .text-stroke {
+    -webkit-text-stroke: 1px hsl(0 0% 100% / 0.25);
+    color: transparent;
+  }
+  .text-stroke-hover:hover {
+    -webkit-text-stroke: 1px #00ffa3;
+    color: hsl(158 100% 50% / 0.1);
+  }
+
+  /* Fonte de instrumento: TAGs, códigos, contadores, rótulos de seção. */
+  .font-hud {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.1em;
+  }
+
+  /* Card do Aetheris: borda acende no mint, superfície clareia de leve. */
+  .hover-card {
+    transition: all 0.3s var(--ease-out-expo);
+  }
+  .hover-card:hover {
+    background: hsl(0 0% 100% / 0.03);
+    border-color: #00ffa3;
+  }
+
+  .hover-glow { transition: box-shadow 0.3s var(--ease-out-expo); }
+  .hover-glow:hover { box-shadow: var(--glow-mint); }
+
+  /* Aetheris não levanta elementos; ele acende a borda. `hover-lift` fica como
+     alias de `hover-card` para não quebrar as dezenas de usos já existentes. */
+  .hover-lift {
+    transition: all 0.3s var(--ease-out-expo);
+  }
+  .hover-lift:hover {
+    background: hsl(0 0% 100% / 0.03);
+    border-color: hsl(158 100% 50% / 0.7);
+  }
+
+  .glass {
+    background: hsl(0 0% 1.2% / 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Separador técnico com o traço mint ao centro. */
+  .tech-separator {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.1), transparent);
+    position: relative;
+    margin: 0 auto;
+  }
+  .tech-separator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 3px;
+    background: #00ffa3;
+    box-shadow: 0 0 10px hsl(158 100% 50% / 0.5);
+  }
+
+  /* Marca de canto do HUD. As bordas concretas vêm das utilidades do Tailwind
+     no elemento (border-l/border-t etc.), aqui fica só a métrica comum. */
+  .hud-mark {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-color: hsl(0 0% 100% / 0.35);
+    pointer-events: none;
+  }
+
+  /* Fio mint na emenda entre a coluna do formulário e a da arte. */
+  .seam-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      hsl(var(--primary) / 0.35) 22%,
+      hsl(var(--primary) / 0.55) 50%,
+      hsl(var(--primary) / 0.35) 78%,
+      transparent
+    );
+  }
+
+  /* Rótulo de seção em HUD, como "SYS_ARCH_V2" no Aetheris. */
+  .hud-label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #00ffa3;
+  }
+
+  /* Ponto de status pulsante do cabeçalho. */
+  .hud-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #00ffa3;
+    box-shadow: 0 0 8px hsl(158 100% 50% / 0.8);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* =============================================================================
+   Tela de acesso — layout em duas colunas
+   -----------------------------------------------------------------------------
+   Esquerda: painel do formulário, altura total, sobre o void com grid técnico.
+   Direita:  o palco com a arte "Life Is On | Preserv" (/image.png).
+
+   As animações não acrescentam elementos estranhos à imagem: elas dão vida ao
+   que ela já mostra — a esfera respira, um arco percorre a borda iluminada, o
+   flare central pulsa e as partículas verdes sobem devagar.
+   ========================================================================== */
+
+/* --- Palco da arte (coluna direita) ------------------------------------- */
+.login-stage {
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+
+/* `contain` em vez de `cover`: a arte é 3:2 e o wordmark é largo, então
+   `cover` cortaria "Life Is" e "Preserv" numa coluna estreita. Como as bordas
+   da imagem são pretas e o palco também, o letterbox é invisível. */
+.login-art {
+  position: absolute;
+  inset: 0;
+  background-image: url('/image.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: art-breathe 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes art-breathe {
+  0%, 100% { transform: scale(1) translate3d(0, 0, 0); }
+  50%      { transform: scale(1.05) translate3d(0, -0.6%, 0); }
+}
+
+/* Arco orbital: acompanha a borda iluminada da esfera. */
+.login-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(76%, 76vh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 195deg,
+    hsl(140 100% 55% / 0.30) 258deg,
+    hsl(140 100% 72% / 0.60) 292deg,
+    hsl(140 100% 55% / 0.22) 322deg,
+    transparent 358deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 0 48.4%, #000 48.9% 50%, transparent 50.4%);
+  mask: radial-gradient(circle, transparent 0 48.4%, #000 48.9% 50%, transparent 50.4%);
+  filter: blur(1px);
+  animation: orbit-spin 44s linear infinite;
+  will-change: transform;
+}
+
+@keyframes orbit-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Núcleo: o flare do botão de power respirando. */
+.login-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(46%, 26rem);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    hsl(140 100% 60% / 0.20) 0%,
+    hsl(140 100% 50% / 0.09) 34%,
+    transparent 68%
+  );
+  filter: blur(26px);
+  animation: core-pulse 6s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes core-pulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.94); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* Partículas: as mesmas motas verdes da arte, agora à deriva. */
+.login-mote {
+  position: absolute;
+  border-radius: 9999px;
+  background: hsl(140 100% 72%);
+  box-shadow: 0 0 8px hsl(140 100% 60% / 0.9);
+  opacity: 0;
+  animation: mote-drift linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes mote-drift {
+  0%   { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.6); }
+  15%  { opacity: 0.9; }
+  70%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translate3d(10px, -110px, 0) scale(1.1); }
+}
+
+/* Costura entre as duas colunas: a arte dissolve na borda esquerda para
+   encostar no painel do formulário sem uma linha dura. */
+.login-seam {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #000 0%,
+    hsl(0 0% 0% / 0.55) 12%,
+    transparent 34%
+  );
+}
+
+/* --- Empilhamento no mobile ---------------------------------------------
+   Abaixo de lg o palco vira uma faixa acima do formulário, e a costura passa
+   a ser vertical. */
+@media (max-width: 1023px) {
+  .login-seam {
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      hsl(0 0% 0% / 0.7) 78%,
+      #000 100%
+    );
+  }
+}
+
+/* =============================================================================
+   Animações de entrada e estado
+   ========================================================================== */
+@keyframes fade-up   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up  { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scale-in  { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse-soft{ 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+@keyframes ring-pulse {
+  0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
+  70%  { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@layer utilities {
+  .reveal-up    { animation: fade-up 0.7s var(--ease-out-expo) both; }
+  .reveal-in    { animation: fade-in 0.6s var(--ease-out-expo) both; }
+  .reveal-scale { animation: scale-in 0.5s var(--ease-out-expo) both; }
+
+  /* Nome próprio para não colidir com o `delay-*` do Tailwind, que controla
+     transition-delay e não animation-delay. */
+  .reveal-delay-75  { animation-delay: 75ms; }
+  .reveal-delay-150 { animation-delay: 150ms; }
+  .reveal-delay-225 { animation-delay: 225ms; }
+  .reveal-delay-300 { animation-delay: 300ms; }
+  .reveal-delay-450 { animation-delay: 450ms; }
+  .reveal-delay-600 { animation-delay: 600ms; }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(0 0% 100% / 0.04) 25%,
+      hsl(0 0% 100% / 0.09) 50%,
+      hsl(0 0% 100% / 0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+}
+
+/* =============================================================================
+   Estados de tempo real e kanban
+   ========================================================================== */
+.realtime-pulse {
+  animation: ring-pulse 1.6s ease-out 2;
+  border-color: hsl(var(--primary) / 0.6) !important;
+}
+
+@keyframes saving-stripes {
+  0%   { background-position: 0 0; }
+  100% { background-position: 24px 0; }
+}
+
+.kanban-saving { position: relative; opacity: 0.85; }
+.kanban-saving::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px dashed hsl(var(--primary) / 0.55);
+  background-image: repeating-linear-gradient(
+    45deg,
+    hsl(var(--primary) / 0.06) 0 6px,
+    transparent 6px 12px
+  );
+  background-size: 24px 24px;
+  animation: saving-stripes 1.2s linear infinite;
+}
+
+.kanban-confirmed {
+  animation: ring-pulse 0.9s ease-out 1;
+  border-color: hsl(var(--success) / 0.7) !important;
+}
+
+@keyframes ghost-breathe {
+  0%, 100% { background-color: hsl(var(--primary) / 0.05); border-color: hsl(var(--primary) / 0.45); }
+  50%      { background-color: hsl(var(--primary) / 0.12); border-color: hsl(var(--primary) / 0.7); }
+}
+
+.kanban-ghost-pulse {
+  animation: ghost-breathe 1.4s ease-in-out infinite;
+  transition: all 200ms var(--ease-out-expo);
+}
+
+/* =============================================================================
+   Movimento reduzido
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .login-art,
+  .login-orbit,
+  .login-core,
+  .login-mote,
+  .hud-dot,
+  .skeleton-shimmer,
+  .kanban-saving::after,
+  .kanban-confirmed,
+  .kanban-ghost-pulse {
+    animation: none !important;
+  }
+
+  /* Sem animação, as partículas ficariam paradas no meio da tela (a animação
+     é que controla a opacidade delas). Melhor não exibi-las. */
+  .login-mote { display: none; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

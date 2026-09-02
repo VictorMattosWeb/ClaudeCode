@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sondero - Sistema Operacional de IA</title>
+<!-- fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="assets/dc82868d160599b9_css2.css" rel="stylesheet"/>
+<link href="assets/c9325543f4659bb1_css2.css" rel="stylesheet"/>
+<link href="assets/ab228c398c0be0cd_css2.css" id="all-fonts-link-font-geist" rel="stylesheet"/>
+<!-- css -->
+<!-- Tailwind v3.4.17 compiled utility classes used throughout the entire page -->
+<link rel="stylesheet" href="assets/css/tailwind.css"/>
+<!-- Body base font (Inter) and .font-geist utility used in cards, copy and footer -->
+<link rel="stylesheet" href="assets/css/typography.css"/>
+<!-- Hero intro animations, blink cursor, and reveal-up scroll animations -->
+<link rel="stylesheet" href="assets/css/animations.css"/>
+<!-- Offline visibility safety net (forces opacity:1, collapses GSAP pin spacers) -->
+<link rel="stylesheet" href="assets/css/offline-fix.css"/>
+<!-- head-only js -->
+<!-- Tailwind v3.4.17 runtime (kept in head to apply utilities before paint) -->
+<script src="assets/176e894661aa9cdc_3.4.17"></script>
+<!-- Lucide icons runtime (defines window.lucide for createIcons() called later) -->
+<script src="assets/3fb12af853a359d4_lucide.min.js"></script>
+<!-- Aura Supabase token firewall (must run before any storage/network access) -->
+<script src="assets/js/supabase-firewall.js"></script>
+<!-- Google Analytics 4 dataLayer init -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-2M6V79H761"></script>
+<script src="assets/js/ga4-init.js"></script>
+</head>
+<body class="antialiased min-h-screen flex flex-col items-center selection:bg-gray-100 text-gray-900 relative overflow-x-hidden">
+
+<!-- background-hero -->
+<div class="absolute top-0 left-0 w-full h-screen -z-10 bg-cover bg-center bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/169cdb38-2656-4555-bec1-d1acc64bb6fa_3840w.png)] animate-bg-intro"></div>
+
+<div class="w-full max-w-7xl flex flex-col relative min-h-screen">
+
+<!-- header -->
+<header class="md:px-12 flex z-10 w-full pt-6 pr-6 pb-6 pl-6 relative items-center justify-between animate-header-intro">
+<a class="flex items-center select-none" href="#">
+<img alt="Sondero" class="mix-blend-multiply h-7 object-contain" src="assets/2a45e0c23f413529_1cecfee1-4f70-44cb-859d-503cb0.png"/>
+</a>
+<nav class="hidden gap-x-4 md:flex">
+<a class="text-sm font-normal text-gray-500 hover:text-gray-900 transition-colors" href="#">Produto</a>
+<a class="text-sm font-normal text-gray-500 hover:text-gray-900 transition-colors" href="#">Segurança</a>
+<a class="text-sm font-normal text-gray-500 hover:text-gray-900 transition-colors" href="#">Preços</a>
+<a class="text-sm font-normal text-gray-500 hover:text-gray-900 transition-colors" href="#">Documentação</a>
+<a class="text-sm font-normal text-gray-500 hover:text-gray-900 transition-colors" href="#">Suporte</a>
+</nav>
+<div class="flex items-center gap-6">
+<a class="text-xs tracking-widest font-normal text-gray-500 hover:text-gray-900 uppercase transition-colors hidden sm:block" href="#">Entrar</a>
+<a class="inline-flex items-center justify-center text-white px-5 py-2.5 rounded text-xs font-medium tracking-[0.15em] uppercase transition-all shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_2px_4px_rgba(0,0,0,0.1)] hover:opacity-90 bg-[#0D3C1F]" href="#">Iniciar Teste Grátis</a>
+</div>
+</header>
+
+<!-- hero -->
+<main class="flex-grow flex flex-col text-center pt-0 pr-6 pb-32 pl-6 items-center justify-center">
+<h1 class="leading-[1.1] bg-clip-text md:text-7xl text-5xl font-semibold text-transparent tracking-tighter font-geist bg-gradient-to-b from-[#3D7F61] to-[#0D3C1F] max-w-4xl animate-title-intro" style='font-family: "Playfair Display", serif;'>
+Sistemas de IA que tornam suas melhores pessoas
+<span class="inline-block border-r-4 border-[#0D3C1F] pr-1 animate-blink" id="word-carousel">bem-sucedidas</span>
+</h1>
+<p class="md:text-xl leading-relaxed text-lg font-normal text-gray-500 max-w-2xl mt-8 animate-subtitle-intro" style="font-family: 'Geist', sans-serif">
+Estamos construindo um sistema operacional de IA para empresas que querem mais receita em menos tempo.
+</p>
+<div class="mt-14 animate-btn-intro">
+<a class="inline-flex items-center justify-center uppercase transition-all hover:opacity-90 text-xs font-medium text-white tracking-[0.15em] rounded pt-4 pr-8 pb-4 pl-8 shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_2px_4px_rgba(0,0,0,0.1)]" href="#" style="background-color: #0D3C1F">Veja em ação</a>
+</div>
+</main>
+</div>
+
+<!-- features -->
+<section class="w-full bg-[#FAF9F6] py-24 md:py-32 px-6 flex justify-center relative z-20">
+<div class="max-w-7xl w-full flex flex-col items-center">
+<h2 class="text-3xl md:text-5xl font-semibold text-[#0D3C1F] text-center max-w-3xl tracking-tight leading-tight reveal-up" style='font-family: "Playfair Display", serif;'>
+IA por muito tempo foi coisa só do Vale do Silício e de startups. Isso está mudando agora.
+</h2>
+<p class="mt-6 text-lg text-[#4A6B5A] text-center max-w-2xl leading-relaxed font-geist reveal-up delay-100">
+A maioria das iniciativas de IA termina em uma apresentação. Não em um sistema que roda às 7h da manhã. A Sondero constrói sistemas de IA prontos que se conectam diretamente às suas ferramentas existentes — e mantêm seu pessoal livre para o trabalho que realmente importa.
+</p>
+<div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+
+<!-- feature-card-1 -->
+<div class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(13,60,31,0.06)] flex flex-col overflow-hidden max-w-sm mx-auto w-full reveal-up delay-100 transition-transform duration-500 hover:-translate-y-1">
+<div class="h-72 w-full relative bg-gradient-to-br from-[#F5F8F6] to-[#EAEFEB] overflow-hidden flex items-center justify-center border-b border-gray-50">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white/60 via-transparent to-transparent"></div>
+<div class="absolute -bottom-12 -right-12 w-64 h-64 bg-white/80 blur-3xl rounded-full"></div>
+<div class="relative z-10 flex items-center gap-5">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-px bg-gradient-to-r from-transparent via-[#3D7F61]/20 to-transparent"></div>
+<div class="w-12 h-12 rounded-xl bg-white/40 backdrop-blur-md border border-white/60 shadow-sm flex items-center justify-center text-[#3D7F61] z-10">
+<i data-lucide="mail" class="w-5 h-5"></i>
+</div>
+<div class="w-16 h-16 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-md flex items-center justify-center text-[#0D3C1F] z-20 scale-110">
+<i data-lucide="message-square" class="w-7 h-7"></i>
+</div>
+<div class="w-12 h-12 rounded-xl bg-white/40 backdrop-blur-md border border-white/60 shadow-sm flex items-center justify-center text-[#3D7F61] z-10">
+<i data-lucide="calendar" class="w-5 h-5"></i>
+</div>
+</div>
+</div>
+<div class="p-8 flex flex-col gap-3 grow">
+<h3 class="text-xl font-semibold text-[#0D3C1F] tracking-tight" style="font-family: 'Playfair Display', serif;">Funciona com o que você já tem.</h3>
+<p class="text-base text-[#4A6B5A] leading-relaxed font-geist">A Sondero se conecta diretamente às suas ferramentas existentes — Gmail, Outlook, Slack, Teams. Sem trocar de sistema, sem migração, sem projeto de TI.</p>
+</div>
+</div>
+
+<!-- feature-card-2 -->
+<div class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(13,60,31,0.06)] flex flex-col overflow-hidden max-w-sm mx-auto w-full reveal-up delay-200 transition-transform duration-500 hover:-translate-y-1">
+<div class="h-72 w-full relative bg-gradient-to-bl from-[#F5F8F6] to-[#EAEFEB] overflow-hidden flex items-center justify-center border-b border-gray-50">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/60 via-transparent to-transparent"></div>
+<div class="absolute -top-12 -left-12 w-64 h-64 bg-white/80 blur-3xl rounded-full"></div>
+<div class="relative z-10 w-28 h-32 rounded-t-full rounded-b-2xl bg-white/50 backdrop-blur-xl border border-white/80 shadow-[0_8px_16px_rgba(13,60,31,0.04)] flex flex-col items-center justify-center">
+<i data-lucide="shield" class="w-10 h-10 text-[#0D3C1F] opacity-80 mb-2"></i>
+<div class="flex gap-1 opacity-70">
+<i data-lucide="star" class="w-3 h-3 text-[#3D7F61] fill-current"></i>
+<i data-lucide="star" class="w-3 h-3 text-[#3D7F61] fill-current"></i>
+<i data-lucide="star" class="w-3 h-3 text-[#3D7F61] fill-current"></i>
+</div>
+</div>
+</div>
+<div class="p-8 flex flex-col gap-3 grow">
+<h3 class="text-xl font-semibold text-[#0D3C1F] tracking-tight" style="font-family: 'Playfair Display', serif;">Construído para padrões europeus.</h3>
+<p class="text-base text-[#4A6B5A] leading-relaxed font-geist">Compatível com a LGPD desde a base. Servidores na UE, Zero Data Retention, contrato de processamento incluído. Seus dados não saem da Europa.</p>
+</div>
+</div>
+
+<!-- feature-card-3 -->
+<div class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(13,60,31,0.06)] flex flex-col overflow-hidden max-w-sm mx-auto w-full reveal-up delay-300 transition-transform duration-500 hover:-translate-y-1">
+<div class="h-72 w-full relative bg-gradient-to-b from-[#F5F8F6] to-[#EAEFEB] overflow-hidden flex items-center justify-center border-b border-gray-50">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-white/60 via-transparent to-transparent"></div>
+<div class="absolute top-0 right-0 w-48 h-48 bg-[#3D7F61]/5 blur-3xl rounded-full"></div>
+<div class="relative z-10 flex items-center">
+<div class="w-20 h-20 rounded-full bg-white/60 backdrop-blur-xl border border-white/80 shadow-md flex items-center justify-center text-[#0D3C1F] z-20 translate-x-4">
+<i data-lucide="user" class="w-8 h-8 opacity-80"></i>
+</div>
+<div class="w-20 h-20 rounded-2xl rotate-12 bg-gradient-to-br from-[#3D7F61]/10 to-transparent backdrop-blur-md border border-white/60 shadow-inner flex items-center justify-center text-[#3D7F61] z-10 -translate-x-4">
+<i data-lucide="sparkles" class="w-7 h-7 -rotate-12 opacity-70"></i>
+</div>
+</div>
+</div>
+<div class="p-8 flex flex-col gap-3 grow">
+<h3 class="text-xl font-semibold text-[#0D3C1F] tracking-tight" style="font-family: 'Playfair Display', serif;">Fortalece seu time, não o substitui.</h3>
+<p class="text-base text-[#4A6B5A] leading-relaxed font-geist">A Sondero não substitui ninguém. Nossos sistemas tiram dos seus melhores profissionais o trabalho que ninguém precisaria fazer — para que possam se concentrar no que só eles podem fazer.</p>
+</div>
+</div>
+
+</div>
+<p class="mt-16 text-sm text-[#4A6B5A] italic font-geist text-center reveal-up delay-300">Sem consultoria. Sem workshops. Sistemas que rodam.</p>
+</div>
+</section>
+
+<!-- bento-stats -->
+<section class="w-full bg-white py-24 md:py-[100px] px-6 flex justify-center relative z-20">
+<div class="max-w-[1200px] w-full flex flex-col items-center">
+<h2 class="text-3xl md:text-5xl font-semibold text-[#0D3C1F] text-center max-w-3xl tracking-tight leading-tight reveal-up delay-100" style='font-family: "Playfair Display", serif;'>E se suas melhores pessoas só fizessem o que importa?</h2>
+<div class="mt-16 w-full grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[auto]">
+
+<!-- bento-tile-1 -->
+<div class="md:col-span-5 md:row-span-2 bg-[#0D3C1F] rounded-2xl p-8 flex flex-col relative overflow-hidden reveal-up delay-100 min-h-[400px]">
+<div class="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-b from-transparent to-[#0D3C1F] z-10 pointer-events-none"></div>
+<div class="absolute -top-10 -right-10 w-64 h-64 bg-[#3D7F61]/20 blur-3xl rounded-full"></div>
+<div class="absolute top-8 right-8 w-40 h-32 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center justify-center transform rotate-6 z-0">
+<svg class="text-[#FAF9F6] opacity-30 -rotate-6" fill="none" height="48" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+</div>
+<div class="absolute top-16 right-24 w-24 h-20 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 shadow-inner flex items-center justify-center transform -rotate-3 z-0">
+<svg class="text-[#3D7F61] opacity-50 rotate-3" fill="none" height="32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+</div>
+<div class="mt-auto relative z-20 flex flex-col gap-2 pt-32">
+<div class="text-[72px] leading-none text-[#F69066] font-semibold" style="font-family: 'Playfair Display', serif;">28%</div>
+<p class="text-[16px] text-[#FAF9F6] font-geist leading-relaxed">do tempo de trabalho é gasto lendo e organizando e-mails.</p>
+<p class="text-[12px] text-[#3D7F61] font-geist italic mt-2">Microsoft Workplace Study</p>
+</div>
+</div>
+
+<!-- bento-tile-2 -->
+<div class="md:col-span-4 bg-[#F5F5F3] rounded-2xl p-8 flex flex-col justify-between reveal-up delay-200 min-h-[220px]">
+<div class="text-[56px] leading-tight text-[#0D3C1F] font-semibold" style="font-family: 'Playfair Display', serif;">72%</div>
+<div class="mt-4">
+<p class="text-[15px] text-[#4A6B5A] font-geist leading-snug mb-2">do tempo do time de vendas vai para administração. Não para vender.</p>
+<p class="text-[11px] text-[#8A9E92] font-geist italic">Salesforce State of Sales 2025</p>
+</div>
+</div>
+
+<!-- bento-tile-3 -->
+<div class="md:col-span-3 bg-[#3D7F61] rounded-2xl p-8 flex flex-col relative overflow-hidden reveal-up delay-300 min-h-[220px]">
+<svg class="absolute top-6 right-6 text-white opacity-80" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2-1 4-2 7-2 2.5 0 4.5 1 6.5 2a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+<div class="mt-auto">
+<h3 class="text-[22px] leading-tight text-white font-semibold mb-2" style="font-family: 'Playfair Display', serif;">Servidores na UE.<br/>Zero Data Retention.</h3>
+<p class="text-[14px] text-[#D4E8DC] font-geist leading-snug">Seus dados não saem da Europa. Ponto.</p>
+</div>
+</div>
+
+<!-- bento-tile-4 -->
+<div class="md:col-span-4 bg-[#F5F5F3] rounded-2xl p-8 flex flex-col justify-between reveal-up delay-200 min-h-[220px]">
+<div class="text-[56px] leading-tight text-[#0D3C1F] font-semibold" style="font-family: 'Playfair Display', serif;">121</div>
+<div class="mt-4"><p class="text-[14px] text-[#4A6B5A] font-geist leading-snug">E-mails por dia. Em média.</p></div>
+</div>
+
+<!-- bento-tile-5 -->
+<div class="md:col-span-3 bg-[#0D3C1F] rounded-2xl p-8 flex flex-col justify-end reveal-up delay-300 min-h-[220px]">
+<h3 class="text-[20px] leading-tight text-[#FAF9F6] font-semibold mb-2" style="font-family: 'Playfair Display', serif;">A Sondero cresce com você.</h3>
+<p class="text-[14px] text-[#8ABF9E] font-geist leading-snug">Cada novo módulo aproveita as integrações que você já tem. Automaticamente.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ways-to-work -->
+<section class="w-full bg-white py-24 md:py-[100px] px-6 flex justify-center relative z-20">
+<div class="max-w-[1200px] w-full flex flex-col items-center">
+<h2 class="text-3xl md:text-5xl font-semibold text-[#0D3C1F] text-center max-w-3xl tracking-tight leading-tight reveal-up" style='font-family: "Playfair Display", serif;'>Três formas de trabalhar com a Sondero.</h2>
+<p class="mt-6 text-[16px] text-[#4A6B5A] text-center max-w-[600px] leading-relaxed font-geist reveal-up delay-100">Seja com módulos prontos, acompanhamento estratégico ou sistemas sob medida — você decide o que sua empresa precisa.</p>
+
+<div class="mt-16 w-full flex flex-col gap-4">
+
+<!-- platform-tile -->
+<div class="md:p-16 flex flex-col md:flex-row min-h-[480px] overflow-hidden reveal-up delay-100 bg-[#0D3C1F] w-full rounded-[16px] p-8 relative shadow-[0_8px_32px_rgba(13,60,31,0.12)]">
+<div class="w-full md:w-[50%] flex flex-col justify-center relative z-20 md:pr-16">
+<div class="text-[12px] uppercase tracking-[0.15em] text-[#3D7F61] font-geist font-medium mb-6">PLATAFORMA SONDERO</div>
+<h3 class="text-[36px] font-semibold text-[#FAF9F6] leading-tight mb-6 tracking-tight" style="font-family: 'Playfair Display', serif;">Módulos de IA prontos. Um dashboard. Produtivo na hora.</h3>
+<p class="text-[16px] text-[#B8D4C4] font-geist leading-[1.8] mb-12 max-w-lg">Nossa plataforma se conecta às suas ferramentas existentes e entrega fluxos de trabalho prontos — de triagem de e-mails à preparação de reuniões, passando por relatórios automatizados. Sem desenvolvimento. Ative o módulo, configure, está rodando.</p>
+<a class="mt-auto md:mt-0 self-start text-[15px] text-[#F69066] font-geist hover:underline flex items-center gap-2 transition-all" href="#">Conheça a plataforma<span class="text-xl leading-none">→</span></a>
+</div>
+<div class="w-full md:w-[50%] mt-16 md:mt-0 relative flex items-center justify-center min-h-[320px] md:min-h-full">
+<div class="absolute inset-0 w-full h-full flex flex-col gap-6 justify-center items-end opacity-90 transform translate-x-4 md:translate-x-12">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#3D7F61] blur-[100px] rounded-full opacity-60"></div>
+<div class="absolute top-1/4 right-1/4 w-32 h-32 bg-[#F69066]/20 blur-[80px] rounded-full opacity-40"></div>
+
+<div class="w-full max-w-[340px] h-24 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] p-5 flex items-center gap-5 transform -translate-x-12 relative z-10 hover:-translate-y-1 transition-transform duration-300">
+<div class="w-10 h-10 rounded-lg bg-[#3D7F61]/30 flex-shrink-0 flex items-center justify-center">
+<svg class="text-[#8ABF9E]" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" x2="12" y1="22.08" y2="12"></line></svg>
+</div>
+<div class="flex flex-col gap-3 w-full">
+<div class="w-3/4 h-2.5 rounded-full bg-white/30"></div>
+<div class="w-1/2 h-2 rounded-full bg-white/10"></div>
+</div>
+</div>
+
+<div class="w-full max-w-[400px] h-32 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-[0_16px_48px_rgba(0,0,0,0.3)] p-6 flex flex-col justify-between relative z-20 transform -translate-x-4 hover:-translate-y-1 transition-transform duration-300">
+<div class="flex items-center justify-between w-full">
+<div class="flex items-center gap-4 w-full">
+<div class="w-12 h-12 rounded-full bg-[#F69066]/20 border border-[#F69066]/30 flex-shrink-0 flex items-center justify-center">
+<svg class="text-[#F69066]" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+</div>
+<div class="w-1/2 h-3.5 rounded-full bg-white/40"></div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/10 flex-shrink-0 flex items-center justify-center">
+<svg class="text-white/70" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+</div>
+</div>
+<div class="flex gap-3 w-full">
+<div class="w-1/3 h-2.5 rounded-full bg-[#3D7F61]/60"></div>
+<div class="w-1/4 h-2.5 rounded-full bg-white/20"></div>
+<div class="w-1/5 h-2.5 rounded-full bg-white/10"></div>
+</div>
+</div>
+
+<div class="w-full max-w-[320px] h-20 rounded-xl bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] p-5 flex items-center gap-4 transform translate-x-2 relative z-10 hover:-translate-y-1 transition-transform duration-300">
+<div class="w-10 h-10 rounded-lg bg-white/10 flex-shrink-0 flex items-center justify-center">
+<svg class="text-white/70" fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+</div>
+<div class="flex flex-col gap-2 w-full">
+<div class="w-2/3 h-2 rounded-full bg-white/20"></div>
+<div class="w-1/3 h-2 rounded-full bg-white/10"></div>
+</div>
+</div>
+
+<div class="w-full max-w-[260px] h-16 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] p-4 flex items-center gap-4 transform translate-x-12 relative z-0 opacity-60">
+<div class="w-8 h-8 rounded-full bg-white/10 flex-shrink-0"></div>
+<div class="flex flex-col gap-2 w-full">
+<div class="w-3/4 h-1.5 rounded-full bg-white/20"></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- small-tiles -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<div class="bg-[#F5F5F3] rounded-[16px] p-8 flex flex-col reveal-up delay-200 hover:-translate-y-1 transition-transform duration-300">
+<div class="text-[11px] uppercase tracking-[0.15em] text-[#8A9E92] font-geist font-medium mb-4">CONSULTORIA</div>
+<h3 class="text-[22px] font-semibold text-[#0D3C1F] leading-tight mb-3" style="font-family: 'Playfair Display', serif;">Saiba onde a IA tem mais impacto na sua empresa.</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6] mb-8 grow">Vocês estão prontos para IA? Onde estão os maiores potenciais? Analisamos seus processos e mostramos onde a automação traz impacto real — antes de você investir um centavo.</p>
+<a class="mt-auto self-start text-[13px] text-[#3D7F61] font-geist hover:underline flex items-center gap-1 transition-all" href="#">Agendar conversa inicial<span class="text-base leading-none">→</span></a>
+</div>
+<div class="bg-[#F5F5F3] rounded-[16px] p-8 flex flex-col reveal-up delay-300 hover:-translate-y-1 transition-transform duration-300">
+<div class="text-[11px] uppercase tracking-[0.15em] text-[#8A9E92] font-geist font-medium mb-4">PROJETOS SOB MEDIDA</div>
+<h3 class="text-[22px] font-semibold text-[#0D3C1F] leading-tight mb-3" style="font-family: 'Playfair Display', serif;">Seu fluxo ainda não existe? A gente constrói.</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6] mb-8 grow">Nem todo processo cabe em um módulo padrão. Se o seu caso é específico, desenvolvemos um sistema sob medida — com a mesma arquitetura e os mesmos padrões de segurança.</p>
+<a class="mt-auto self-start text-[13px] text-[#3D7F61] font-geist hover:underline flex items-center gap-1 transition-all" href="#">Conversar sobre o projeto<span class="text-base leading-none">→</span></a>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- process-flow -->
+<section class="w-full bg-[#FAF9F6] py-24 md:py-[100px] px-6 flex justify-center relative z-20">
+<div class="max-w-[1200px] w-full flex flex-col items-center">
+<h2 class="text-3xl md:text-5xl font-semibold text-[#0D3C1F] text-center max-w-3xl tracking-tight leading-tight reveal-up" style='font-family: "Playfair Display", serif;'>Da primeira conversa ao sistema rodando. Em dias, não meses.</h2>
+<p class="mt-6 text-[16px] text-[#4A6B5A] text-center max-w-[620px] leading-relaxed font-geist reveal-up delay-100">Sem maratona de onboarding. Sem gestão de mudança. Quatro passos, e está rodando.</p>
+
+<div class="mt-20 w-full relative reveal-up delay-200">
+<div class="hidden md:block absolute top-[20px] left-4 right-[20%] h-[1px] bg-[#0D3C1F]/20 z-0"></div>
+<div class="md:hidden absolute top-[20px] bottom-10 left-[24px] w-[1px] bg-[#0D3C1F]/20 z-0"></div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 relative z-10">
+
+<div class="flex flex-col relative pl-16 md:pl-0">
+<div class="absolute md:relative left-0 top-0 flex justify-center md:justify-start md:mb-4 bg-[#FAF9F6] py-2 md:py-0 md:pr-6 md:inline-block w-12 md:w-auto z-10">
+<span class="text-[40px] text-[#F69066] leading-none" style="font-family: 'Playfair Display', serif;">01</span>
+</div>
+<h3 class="text-[20px] font-semibold text-[#0D3C1F] mb-3 md:mt-2 tracking-tight" style="font-family: 'Playfair Display', serif;">Conversa</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6]">30 minutos. A gente escuta, faz as perguntas certas e descobre onde está o maior ponto de alavancagem para você.</p>
+</div>
+
+<div class="flex flex-col relative pl-16 md:pl-0">
+<div class="absolute md:relative left-0 top-0 flex justify-center md:justify-start md:mb-4 bg-[#FAF9F6] py-2 md:py-0 md:pr-6 md:inline-block w-12 md:w-auto z-10">
+<span class="text-[40px] text-[#F69066] leading-none" style="font-family: 'Playfair Display', serif;">02</span>
+</div>
+<h3 class="text-[20px] font-semibold text-[#0D3C1F] mb-3 md:mt-2 tracking-tight" style="font-family: 'Playfair Display', serif;">Análise de potencial</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6]">Analisamos seus fluxos atuais e identificamos quais módulos e integrações fazem sentido para você.</p>
+</div>
+
+<div class="flex flex-col relative pl-16 md:pl-0">
+<div class="absolute md:relative left-0 top-0 flex justify-center md:justify-start md:mb-4 bg-[#FAF9F6] py-2 md:py-0 md:pr-6 md:inline-block w-12 md:w-auto z-10">
+<span class="text-[40px] text-[#F69066] leading-none" style="font-family: 'Playfair Display', serif;">03</span>
+</div>
+<h3 class="text-[20px] font-semibold text-[#0D3C1F] mb-3 md:mt-2 tracking-tight" style="font-family: 'Playfair Display', serif;">Implementação</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6]">Conectamos a Sondero às suas ferramentas, configuramos os fluxos e testamos tudo — até rodar redondo.</p>
+</div>
+
+<div class="flex flex-col relative pl-16 md:pl-0">
+<div class="absolute md:relative left-0 top-0 flex justify-center md:justify-start md:mb-4 bg-[#FAF9F6] py-2 md:py-0 md:pr-6 md:inline-block w-12 md:w-auto z-10">
+<span class="text-[40px] text-[#F69066] leading-none" style="font-family: 'Playfair Display', serif;">04</span>
+</div>
+<h3 class="text-[20px] font-semibold text-[#0D3C1F] mb-3 md:mt-2 tracking-tight" style="font-family: 'Playfair Display', serif;">Rodando.</h3>
+<p class="text-[14px] text-[#4A6B5A] font-geist leading-[1.6]">Seu time continua trabalhando no Slack, Teams, Outlook — normalmente. A IA roda em segundo plano. Seu admin gerencia tudo a partir de um dashboard central.</p>
+</div>
+
+</div>
+</div>
+
+<div class="mt-20 flex flex-col md:flex-row gap-4 justify-center items-center w-full reveal-up delay-300">
+<div class="bg-[#0D3C1F] text-white rounded-full px-5 py-2 text-[13px] font-geist text-center w-full md:w-auto shadow-sm">Para o seu time: zero ferramentas novas. Tudo roda nos apps que vocês já usam.</div>
+<div class="bg-[#3D7F61] text-white rounded-full px-5 py-2 text-[13px] font-geist text-center w-full md:w-auto shadow-sm">Para o seu admin: um dashboard. Todos os módulos, todos os usuários, controle total.</div>
+</div>
+</div>
+</section>
+
+<!-- cta -->
+<section class="w-full bg-[#FAF9F6] py-24 md:py-32 px-6 flex justify-center relative z-20">
+<div class="max-w-[1100px] w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-12 reveal-up">
+<div class="max-w-2xl">
+<h2 class="text-5xl md:text-6xl font-semibold text-[#0D3C1F] tracking-tight leading-tight" style="font-family: 'Playfair Display', serif;">Comece em <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#F69066] to-[#E35D30]">minutos</span></h2>
+<p class="mt-6 text-lg md:text-xl text-[#4A6B5A] leading-relaxed font-geist">Experimente nosso playground e comece pelo plano gratuito para testar os modelos da Sondero na sua aplicação.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto shrink-0 mt-8 md:mt-0">
+<a class="inline-flex items-center justify-center px-7 py-3.5 rounded text-xs font-medium tracking-[0.1em] uppercase transition-all bg-[#F69066] hover:bg-[#E35D30] text-white gap-2 shadow-[0_4px_14px_rgba(246,144,102,0.25)] hover:-translate-y-0.5" href="#">
+Solicitar uma Demo
+<i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+</a>
+<a class="inline-flex items-center justify-center px-7 py-3.5 rounded text-xs font-medium tracking-[0.1em] uppercase transition-all bg-[#EAEFEB] hover:bg-[#DCE4DF] text-[#0D3C1F] gap-2 shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:-translate-y-0.5" href="#">
+Cadastre-se grátis
+<i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+</a>
+</div>
+</div>
+</section>
+
+<!-- banner-image -->
+<div class="w-full h-[180px] md:h-[260px] relative overflow-hidden reveal-up z-20">
+<div class="absolute inset-0 bg-cover bg-center bg-[url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&amp;w=2070&amp;auto=format&amp;fit=crop')] contrast-125 sepia-[.3] hue-rotate-[-10deg] opacity-90"></div>
+</div>
+
+<!-- footer -->
+<footer class="w-full bg-[#FAF9F6] pt-12 pb-8 px-6 flex justify-center relative z-20">
+<div class="max-w-[1100px] w-full flex flex-col">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8 mb-10">
+<a class="flex items-center select-none shrink-0" href="#">
+<img alt="Sondero" class="mix-blend-multiply h-7 object-contain" src="assets/2a45e0c23f413529_1cecfee1-4f70-44cb-859d-503cb0.png"/>
+</a>
+<div class="flex flex-wrap justify-center gap-8 md:gap-12 text-xs font-medium text-[#4A6B5A] tracking-[0.05em] uppercase font-geist">
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Y Combinator</a>
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Sobre nós</a>
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Fale conosco</a>
+</div>
+<div class="flex items-center gap-6 text-[#0D3C1F] shrink-0">
+<a class="hover:opacity-70 transition-opacity" href="#" aria-label="X">
+<svg aria-hidden="true" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.25H5.078z"></path></svg>
+</a>
+<a class="hover:opacity-70 transition-opacity" href="#" aria-label="LinkedIn">
+<i class="w-4 h-4" data-lucide="linkedin"></i>
+</a>
+</div>
+</div>
+<div class="w-full h-px bg-gray-200/80 mb-8"></div>
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#8A9E92] font-geist">
+<p>Copyright © 2026 Sondero</p>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Status</a>
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Termos de Uso</a>
+<a class="hover:text-[#0D3C1F] transition-colors" href="#">Política de Privacidade</a>
+</div>
+</div>
+</div>
+</footer>
+
+<!-- js -->
+<!-- Word carousel typewriter (hero), reveal-up IntersectionObserver, and Lucide icon initialization -->
+<script src="assets/js/interactions.js"></script>
+<!-- Aura image fallback: re-routes broken external images to a known local CDN copy -->
+<script src="assets/js/img-fallback.js"></script>
+<!-- Aura offline-fix: rewrites image src/srcset to local assets and forces hidden content visible -->
+<script src="assets/js/offline-fix.js"></script>
+
+</body>
+</html>

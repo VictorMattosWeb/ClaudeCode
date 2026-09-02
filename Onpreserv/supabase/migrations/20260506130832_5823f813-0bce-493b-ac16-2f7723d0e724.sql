@@ -1,0 +1,2 @@
+ALTER TABLE public.cronograma_medicoes ADD COLUMN IF NOT EXISTS ordem integer NOT NULL DEFAULT 0;
+UPDATE public.cronograma_medicoes SET ordem = sub.rn FROM (SELECT id, row_number() OVER (ORDER BY created_at) AS rn FROM public.cronograma_medicoes) sub WHERE public.cronograma_medicoes.id = sub.id AND public.cronograma_medicoes.ordem = 0;

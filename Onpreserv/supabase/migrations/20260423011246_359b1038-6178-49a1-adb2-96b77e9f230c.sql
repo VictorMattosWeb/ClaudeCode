@@ -1,0 +1,1 @@
+ALTER TABLE public.cronograma_itens ADD COLUMN IF NOT EXISTS motivo_divergencia text DEFAULT '';

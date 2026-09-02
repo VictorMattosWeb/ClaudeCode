@@ -1,0 +1,14 @@
+- **Tailwind CSS** (v3.4.17 via CDN runtime) — utility-first CSS framework that generates all layout, spacing, color and typography classes
+- **Tailwind Config** — inline theme extension defining the void/panel/mint palette, Inter+JetBrains Mono families, the tech-grid background and the tightest letter-spacing
+- **Inter** — display and body sans-serif (weights 300–700) loaded from Google Fonts
+- **JetBrains Mono** — monospace family used for HUD readouts, status codes and section labels
+- **GSAP** (v3.12.2) — animation engine driving the preloader exit, hero entrance and `.reveal` section transitions
+- **GSAP ScrollTrigger** — scroll-driven plugin powering the token chart ring stroke draw and the stat count-up animations
+- **Lenis** (v1.0.29) — smooth-scroll library wrapping native scrolling with an ease-out curve
+- **Three.js** (r128) — WebGL engine bundled because Unicorn Studio depends on it
+- **Unicorn Studio** (v2.0.2) — interactive WebGL scene engine rendering the hero "AETHERIS" typographic background
+- **Iconify Web Component** (`iconify-icon`) — custom element rendering the Solar icons in the Core Architecture cards
+- **Solar icon set** — provides `bolt-linear`, `shield-check-linear` and `global-linear` icons via Iconify
+- **Inline SVG** — three footer social glyphs (X, GitHub, Discord) drawn as `currentColor` paths so hover color flows through
+- **Schema.org JSON-LD** — Organization / SoftwareApplication / FAQPage structured-data block embedded in the original `<head>` for SEO
+- **Custom CSS** — handcrafted styles for the preloader, scrollbar theme, text-stroke headlines, hover-card surfaces, scan-line overlay, tech separator, and the 12-ring "digital singularity" tunnel animation

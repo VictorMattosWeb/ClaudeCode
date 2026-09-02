@@ -1,0 +1,1 @@
+CREATE POLICY "Autenticado vê perfis básicos" ON public.profiles FOR SELECT TO authenticated USING (true);

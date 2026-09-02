@@ -1,0 +1,14 @@
+{
+  "name": "onpreserv-server",
+  "private": true,
+  "type": "module",
+  "description": "Backend do onPreserv — Postgres próprio, sem Supabase.",
+  "scripts": {
+    "db:setup": "node db/run.mjs db/001_schema.sql",
+    "db:check": "node db/run.mjs --check",
+    "db:reset": "node db/run.mjs --reset db/001_schema.sql"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
