@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { runWithRetry } from "@/lib/runWithRetry";
 import { cn } from "@/lib/utils";
 import { RefuseRequestDialog } from "@/components/RefuseRequestDialog";
 import { notifyError } from "@/lib/errorMessages";
+import { UserTag } from "@/components/UserTag";
 
 type Status = "pendente" | "aprovado" | "recusado";
 type Tipo = "lote" | "preservacao" | "atividade" | "tarefa" | "quadro" | "edicao_preservacao";
@@ -306,7 +307,11 @@ export default function DeletionRequests() {
                       <span className="font-medium">{r.item_descricao ?? "—"}</span>
                       <div className="text-[10px] text-muted-foreground font-mono truncate">{r.item_id}</div>
                     </TableCell>
-                    {isAdmin && <TableCell>{r.solicitante_nome ?? "—"}</TableCell>}
+                    {isAdmin && (
+                      <TableCell>
+                        <UserTag userId={r.solicitante_id} nome={r.solicitante_nome} size={20} />
+                      </TableCell>
+                    )}
                     <TableCell className="max-w-[300px] text-sm text-muted-foreground space-y-1">
                       <div>{r.justificativa}</div>
                       {r.origem === "edicao_preservacao" && r.dados_atuais && r.dados_propostos && (

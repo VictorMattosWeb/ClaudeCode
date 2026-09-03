@@ -5,6 +5,7 @@ import { Calendar, User, Link2, Users as UsersIcon, ExternalLink } from "lucide-
 import { Task, taskModuloLabel, isTaskOverdue, getTaskAssignees, formatPrazo } from "@/types/task";
 import { PriorityBadge } from "./PriorityBadge";
 import { LabelChip } from "./LabelChip";
+import { UserTag, UserTagGroup } from "@/components/UserTag";
 import { QuickLabelPicker } from "./QuickLabelPicker";
 import { cn } from "@/lib/utils";
 import { useTasks } from "@/context/TaskContext";
@@ -79,32 +80,32 @@ export function TaskCard({ task, users, responsavelNome, onClick, reducedMotion,
             <div className="flex items-center gap-2 min-w-0">
               {(() => {
                 const ids = getTaskAssignees(task);
-                if (ids.length === 0 && responsavelNome) {
-                  return (
-                    <span className="flex items-center gap-1 truncate">
-                      <User className="h-3 w-3" />
-                      {responsavelNome}
-                    </span>
-                  );
-                }
-                if (ids.length === 1) {
-                  const nome = users?.get(ids[0]) ?? responsavelNome;
-                  return nome ? (
-                    <span className="flex items-center gap-1 truncate">
-                      <User className="h-3 w-3" />
-                      {nome}
-                    </span>
+                // Sem id, sobra o nome em texto — registros anteriores ao
+                // cadastro de responsáveis por id ainda existem.
+                if (ids.length === 0) {
+                  return responsavelNome ? (
+                    <UserTag nome={responsavelNome} size={18} className="truncate" />
                   ) : null;
                 }
-                if (ids.length > 1) {
+                if (ids.length === 1) {
+                  // `users` é o nome que a tela já tem em mãos: garante o texto
+                  // mesmo antes de o diretório de fotos terminar de carregar.
                   return (
-                    <span className="flex items-center gap-1 truncate" title={ids.map((i) => users?.get(i) ?? "").join(", ")}>
-                      <UsersIcon className="h-3 w-3" />
-                      {ids.length} responsáveis
-                    </span>
+                    <UserTag
+                      userId={ids[0]}
+                      nome={users?.get(ids[0]) ?? responsavelNome}
+                      size={18}
+                      className="truncate"
+                    />
                   );
                 }
-                return null;
+                // Vários: as fotos sobrepostas dizem QUEM sem ocupar a linha.
+                return (
+                  <span className="flex items-center gap-1.5 truncate">
+                    <UserTagGroup userIds={ids} size={18} />
+                    <span className="truncate">{ids.length} responsáveis</span>
+                  </span>
+                );
               })()}
               {task.modulo_relacionado !== "geral" && (
                 <span className="flex items-center gap-1">

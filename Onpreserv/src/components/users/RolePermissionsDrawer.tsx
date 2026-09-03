@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { toast } from "sonner";
 import { ALL_MODULES, type AppModule, type AppRole } from "@/context/AuthContext";
 import { ALL_ACTIONS, ACTION_LABELS, MODULE_LABELS, ROLE_DESCRIPTIONS, ROLE_LABELS, type AppAction } from "@/lib/permissions";

@@ -14,6 +14,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import type { ManagedUser } from "@/pages/UsersKanban";
+import { UserAvatar } from "@/components/UserAvatar";
+import { useUsersDirectory } from "@/context/UsersDirectoryContext";
 
 interface Props {
   user: ManagedUser;
@@ -44,13 +46,11 @@ export function UserCard({
   });
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
 
-  const initials = user.nome
-    .split(" ")
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  // A foto vem do diretório: este card recebe o usuário da listagem, que nem
+  // sempre carrega `avatar_url`. As iniciais continuam como reserva, dentro do
+  // próprio `UserAvatar`.
+  const { porId } = useUsersDirectory();
+  const foto = porId(user.id)?.avatarPath ?? null;
 
   const style = isOverlay
     ? undefined
@@ -73,9 +73,7 @@ export function UserCard({
       )}
     >
       <div className="flex items-start gap-2">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-          {initials || "?"}
-        </div>
+        <UserAvatar path={foto} nome={user.nome} size={36} />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-1">

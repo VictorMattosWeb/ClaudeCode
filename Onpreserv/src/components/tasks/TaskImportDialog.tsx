@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useTasks } from "@/context/TaskContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { toast } from "sonner";
 import { Upload, Download, FileSpreadsheet, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { ParsedTaskRow, validateTaskRow, downloadTaskImportTemplate, TASK_TEMPLATE_HEADERS } from "@/lib/exportTasksTemplate";

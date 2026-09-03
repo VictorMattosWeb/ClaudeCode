@@ -147,11 +147,23 @@ export function averageLeadTimeDays(tasks: Task[]): number | null {
 
 export interface LotStats {
   total: number;
+  /** Lotes ativos — os que de fato exigem preservação. */
+  ativos: number;
+  /**
+   * Lotes inativos.
+   *
+   * Material que saiu do controle de preservação: foi para o estoque ou teve a
+   * custódia transferida. Não é cobrado, mas precisa ficar visível — é acervo
+   * sob responsabilidade de alguém, e um número que cresce sem explicação é
+   * sinal de que material está saindo do radar.
+   */
+  inativos: number;
   preservados: number; // inclui upcoming
   upcoming: number;
   vencidos: number;
   semPreservacao: number;
-  taxaPreservacao: number; // % preservados / total (0..100, inteiro)
+  /** % preservados sobre os ATIVOS (0..100, inteiro). */
+  taxaPreservacao: number;
 }
 
 /**
@@ -162,20 +174,37 @@ export interface LotStats {
  * As três são mutuamente exclusivas.
  */
 export function computeLotStats(lots: Lot[]): LotStats {
+  // Só os ativos entram na conta. Um lote inativo não exige preservação, então
+  // contá-lo em `semPreservacao` e no denominador da taxa apenas afundava o
+  // indicador com material que ninguém precisa atender.
+  const ativos = lots.filter((l) => l.status === "ativo");
+
   let preservados = 0;
   let upcoming = 0;
   let vencidos = 0;
   let semPreservacao = 0;
-  for (const lot of lots) {
+  for (const lot of ativos) {
     const status = getLotPreservationStatus(lot);
     if (status === "overdue") vencidos++;
     if (status === "none") semPreservacao++;
     if (isLotPreserved(lot)) preservados++;
     if (isLotUpcoming(lot)) upcoming++;
   }
+  // `total` continua sendo tudo que está na lista — é o "Total de lotes" da
+  // tela. Quem muda é o denominador da taxa: só os ativos, que são os que
+  // podem de fato ser cumpridos.
   const total = lots.length;
-  const taxaPreservacao = total === 0 ? 0 : Math.round((preservados / total) * 100);
-  return { total, preservados, upcoming, vencidos, semPreservacao, taxaPreservacao };
+  const taxaPreservacao = ativos.length === 0 ? 0 : Math.round((preservados / ativos.length) * 100);
+  return {
+    total,
+    ativos: ativos.length,
+    inativos: total - ativos.length,
+    preservados,
+    upcoming,
+    vencidos,
+    semPreservacao,
+    taxaPreservacao,
+  };
 }
 
 // =============================================================================

@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { CronogramaItem, MedicaoCronograma, calcularSituacao, ItemCalculado } from "@/types/cronograma";
 import { toast } from "sonner";

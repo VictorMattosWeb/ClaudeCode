@@ -22,6 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTasks } from "@/context/TaskContext";
 import { RowDeleteAction } from "@/components/RowDeleteAction";
 import { cn } from "@/lib/utils";
+import { UserTag, UserTagGroup } from "@/components/UserTag";
 
 interface Props {
   tasks: Task[];
@@ -225,9 +226,18 @@ export function TaskTable({ tasks, users, onEdit, onRowClick }: Props) {
                     {(() => {
                       const ids = getTaskAssignees(t);
                       if (ids.length === 0) return "—";
-                      const nomes = ids.map((id) => users.get(id) ?? "—");
-                      if (ids.length <= 2) return nomes.join(", ");
-                      return `${nomes.slice(0, 2).join(", ")} +${ids.length - 2}`;
+                      if (ids.length <= 2) {
+                        return (
+                          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            {ids.map((id) => (
+                              <UserTag key={id} userId={id} nome={users.get(id)} size={20} />
+                            ))}
+                          </span>
+                        );
+                      }
+                      // A partir de três, só as fotos: a coluna não comporta os
+                      // nomes sem empurrar o resto da tabela.
+                      return <UserTagGroup userIds={ids} size={22} max={4} />;
                     })()}
                   </TableCell>
                   <TableCell className="text-sm">{taskModuloLabel(t.modulo_relacionado)}</TableCell>

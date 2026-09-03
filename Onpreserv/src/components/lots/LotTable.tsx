@@ -26,6 +26,7 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { exportLotsXlsx } from "@/lib/exportLots";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { UserTag } from "@/components/UserTag";
 
 const PAGE_SIZE = 15;
 
@@ -381,18 +382,21 @@ export function LotTable({ filters, onFiltersChange, filteredLots, loading = fal
                       <p className="font-hud mt-1 text-[9px] uppercase text-muted-foreground">
                         {LOT_TIPO_LABEL[lot.tipoLote]}
                       </p>
-                      {getLotCycle(lot).tipo === "dias_corridos" && (
-                        <p className="font-hud mt-0.5 text-[9px] uppercase text-primary/70">
-                          {getLotCycle(lot).label}
-                        </p>
-                      )}
+                      <p className="font-hud mt-0.5 text-[9px] uppercase text-primary/70">
+                        {getLotCycle(lot).label}
+                      </p>
                     </TableCell>
 
                     <TableCell className="px-3">
                       <p className="truncate text-sm font-medium" title={lot.name}>{lot.name}</p>
-                      <p className="font-hud mt-0.5 truncate text-[10px] text-muted-foreground">
-                        {lot.code}
-                        {lot.responsible && ` · ${lot.responsible}`}
+                      <p className="font-hud mt-0.5 flex items-center gap-1.5 truncate text-[10px] text-muted-foreground">
+                        <span>{lot.code}</span>
+                        {lot.responsible && (
+                          <>
+                            <span aria-hidden>·</span>
+                            <UserTag nome={lot.responsible} size={16} />
+                          </>
+                        )}
                       </p>
                     </TableCell>
 
@@ -505,6 +509,7 @@ export function LotTable({ filters, onFiltersChange, filteredLots, loading = fal
         open={bulkPresOpen}
         onOpenChange={setBulkPresOpen}
         selectedCount={selectedCount}
+        selectedLots={lots.filter((l) => selected.has(l.id))}
         onSubmit={handleBulkPreservation}
       />
 

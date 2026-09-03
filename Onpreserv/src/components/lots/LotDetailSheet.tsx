@@ -16,24 +16,23 @@ import { useAuth } from "@/context/AuthContext";
 import {
   Lot, Preservation, LOT_TIPO_LABEL,
   getLotPreservationStatus,
-  getLotOverdueWeeks,
-  getDaysLeftInWeek,
-  currentWeekRange,
   getLotCycle,
+  getLotCycleReference,
   getDaysLeftInCycle,
-  getNextCycleDueDate,
   getLotNextDueDate,
-  getSilicaDaysRemaining, getSilicaExpiryDate, getSilicaStatus, SILICA_VALIDITY_DAYS,
+  getSilicaStatus,
+  getSilicaDaysRemaining,
+  getSilicaExpiryDate,
+  SILICA_VALIDITY_DAYS,
 } from "@/types/lot";
 import { LotStatusPill, LotActivityMark } from "./LotStatusPill";
 import { PreservationTimeline } from "./PreservationTimeline";
 import { PreservationDialog } from "@/components/PreservationDialog";
 import { PreservationEditDialog } from "@/components/PreservationEditDialog";
 import { exportPreservationsCsv, exportPreservationsPdf, exportPreservationsXlsx } from "@/lib/exportPreservations";
-import { supabase } from "@/integrations/supabase/client";
-import { notifyError } from "@/lib/errorMessages";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { UserTag } from "@/components/UserTag";
 
 const formatDate = (d?: string) => {
   if (!d) return "—";
@@ -97,7 +96,7 @@ interface Props {
  *   5. Registro     — cadastro e observações
  */
 export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: Props) {
-  const { getLot, addPreservation } = useLots();
+  const { getLot, addPreservation, clearPreservations } = useLots();
   const { canWrite, isAdmin } = useAuth();
   const [presOpen, setPresOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Preservation | null>(null);
@@ -107,15 +106,14 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
   // Relê do contexto para refletir uma preservação registrada com o painel aberto.
   const lot = getLot(initialLot.id) || initialLot;
 
-  const statusSemana = getLotPreservationStatus(lot);
+  const status = getLotPreservationStatus(lot);
   const ciclo = getLotCycle(lot);
-  const cicloLongo = ciclo.tipo === "dias_corridos";
-  const semanasAtraso = getLotOverdueWeeks(lot);
-  const diasRestantes = getDaysLeftInWeek();
-  const semana = currentWeekRange();
+  const referencia = getLotCycleReference(lot);
   const diasCiclo = getDaysLeftInCycle(lot);
-  const vencimentoCiclo = getNextCycleDueDate(lot);
   const proximaPrevista = getLotNextDueDate(lot);
+  // Antes da primeira preservação o prazo é o da chegada do material, não o da
+  // recorrência — e é isso que o painel precisa dizer.
+  const primeiraPendente = referencia?.primeira ?? false;
   const ultima = lot.preservations[lot.preservations.length - 1];
 
   // Sílica gel: só existe quando a funcionalidade está ativa para o lote —
@@ -129,11 +127,9 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
 
   const handleClearHistory = async () => {
     setClearing(true);
-    const { error } = await supabase.from("preservations").delete().eq("lot_id", lot.id);
+    const ok = await clearPreservations(lot.id);
     setClearing(false);
-    if (error) {
-      notifyError(error, "Não foi possível limpar o histórico.");
-    } else {
+    if (ok) {
       toast.success("Histórico de preservações limpo");
       setClearOpen(false);
     }
@@ -197,21 +193,13 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
                 <Field label="Última preservação" value={formatDate(ultima?.date)} mono />
                 <Field label="Próxima prevista" value={formatDate(proximaPrevista ?? undefined)} mono />
                 <Field
-                  label={cicloLongo ? `Ciclo (${ciclo.label})` : "Ciclo da semana"}
+                  label={primeiraPendente ? "Prazo da 1ª preservação" : `Ciclo (${ciclo.label})`}
                   value={
-                    statusSemana === "none"
-                      ? "Sem registro"
-                      : cicloLongo
-                        ? diasCiclo === null
-                          ? "—"
-                          : diasCiclo < 0
-                            ? `${Math.abs(diasCiclo)} dia(s) de atraso`
-                            : `${diasCiclo} dia(s) restantes`
-                        : statusSemana === "preserved"
-                          ? "Cumprido"
-                          : statusSemana === "upcoming"
-                            ? `Aberto · ${diasRestantes} dia(s)`
-                            : `${semanasAtraso} semana(s) vencida(s)`
+                    diasCiclo === null
+                      ? "Sem data de chegada"
+                      : diasCiclo < 0
+                        ? `${Math.abs(diasCiclo)} dia(s) de atraso`
+                        : `${diasCiclo} dia(s) restantes`
                   }
                   mono
                 />
@@ -219,19 +207,16 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
 
                 <div className="col-span-2 border-t border-border pt-3">
                   <p className="font-hud text-[9px] uppercase text-muted-foreground">
-                    {cicloLongo ? "Próximo vencimento" : "Semana de referência"}
+                    Próximo vencimento
                   </p>
                   <p className="font-hud mt-0.5 text-sm tabular-nums">
-                    {cicloLongo
-                      ? vencimentoCiclo
-                        ? formatDate(vencimentoCiclo.toISOString().slice(0, 10))
-                        : "—"
-                      : `${formatDate(semana.inicio)} — ${formatDate(semana.fim)}`}
+                    {formatDate(proximaPrevista ?? undefined)}
                   </p>
                   <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                    {cicloLongo
-                      ? `Este lote é preservado a cada ${ciclo.dias} dias corridos, contados a partir do último registro. Se o vencimento cai em fim de semana, ele passa para a segunda-feira.`
-                      : "O status considera a semana inteira: uma preservação em qualquer dia entre segunda e domingo cumpre o ciclo."}
+                    {primeiraPendente
+                      ? `Primeira preservação: prazo de ${referencia?.prazoDias} dias a partir da chegada do material (${formatDate(lot.createdAt)}).`
+                      : `A cada ${ciclo.dias} dias corridos, contados do último registro.`}
+                    {" Vencimento em fim de semana passa para a segunda-feira."}
                   </p>
                 </div>
 
@@ -349,7 +334,10 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
                 <Field label="Identificador" value={lot.identificadorInterno} mono />
                 <Field label="Código / NF" value={lot.code} mono />
                 <Field label="Tipo" value={LOT_TIPO_LABEL[lot.tipoLote]} />
-                <Field label="Responsável" value={lot.responsible} />
+                <Field
+                  label="Responsável"
+                  value={lot.responsible ? <UserTag nome={lot.responsible} size={18} /> : null}
+                />
                 <Field label="Local" value={lot.location} />
                 <Field
                   label="Posição física"
@@ -374,6 +362,7 @@ export function LotDetailSheet({ lot: initialLot, open, onOpenChange, onEdit }: 
       <PreservationDialog
         open={presOpen}
         onOpenChange={setPresOpen}
+        lot={lot}
         onSubmit={(data) => addPreservation(lot.id, data)}
       />
 

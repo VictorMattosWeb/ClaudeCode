@@ -18,6 +18,7 @@ import {
 } from "@/types/task";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { UserTag } from "@/components/UserTag";
 
 export type HistoryCategory =
   | "status"
@@ -225,7 +226,7 @@ export function TaskHistoryView({ entries, users, boards }: Props) {
               return "";
             }
           })();
-          const author = d.entry.user_id ? users.get(d.entry.user_id) ?? "Sistema" : "Sistema";
+          const autorId = d.entry.user_id;
           return (
             <li
               key={d.entry.id}
@@ -238,7 +239,17 @@ export function TaskHistoryView({ entries, users, boards }: Props) {
               <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-foreground">{author}</span>
+                  {autorId ? (
+                    <UserTag
+                      userId={autorId}
+                      nome={users.get(autorId)}
+                      vazio="Sistema"
+                      size={18}
+                      nomeClassName="font-medium text-foreground"
+                    />
+                  ) : (
+                    <span className="font-medium text-foreground">Sistema</span>
+                  )}
                   <span className="text-muted-foreground">{meta.label.toLowerCase()}</span>
                   <span className="text-muted-foreground/70 ml-auto">{when}</span>
                 </div>

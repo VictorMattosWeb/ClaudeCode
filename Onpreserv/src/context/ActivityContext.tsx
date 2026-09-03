@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { ActivityLocal, PreservationActivity, SEED_ACTIVITIES } from "@/types/activity";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { runWithRetry } from "@/lib/runWithRetry";

@@ -5,11 +5,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database } from "@/services/adapters/supabase/types";
 import { notifyError } from "@/lib/errorMessages";
 
 export type DeleteItemType = Database["public"]["Enums"]["delete_item_type"];

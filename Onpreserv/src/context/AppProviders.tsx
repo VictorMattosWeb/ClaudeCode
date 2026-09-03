@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { AuthProvider } from "@/context/AuthContext";
+import { UsersDirectoryProvider } from "@/context/UsersDirectoryContext";
 import { LotProvider } from "@/context/LotContext";
 import { ActivityProvider } from "@/context/ActivityContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
@@ -15,6 +16,9 @@ type ProviderComponent = ComponentType<{ children: ReactNode }>;
  */
 const providers: ProviderComponent[] = [
   AuthProvider,
+  // Logo abaixo de Auth: nome e foto de qualquer usuário, para as telas que
+  // exibem autoria (tarefas, comentários, histórico, preservações).
+  UsersDirectoryProvider,
   LotProvider,
   ActivityProvider,
   NotificationsProvider,

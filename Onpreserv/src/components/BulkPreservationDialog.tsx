@@ -6,17 +6,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { UserSelect } from "@/components/UserSelect";
-import { addDays } from "@/types/lot";
+import { getLotFrequencyDays, proximaDataPrevista } from "@/types/lot";
+import type { Lot } from "@/types/lot";
 import { Layers, CheckCircle2 } from "lucide-react";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedCount: number;
+  /** Os lotes selecionados: a frequência de cada um define a data dele. */
+  selectedLots: Lot[];
   onSubmit: (data: { date: string; nextDate: string; observation: string; responsible: string }) => void;
 }
 
-export function BulkPreservationDialog({ open, onOpenChange, selectedCount, onSubmit }: Props) {
+export function BulkPreservationDialog({
+  open,
+  onOpenChange,
+  selectedCount,
+  selectedLots,
+  onSubmit,
+}: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [observation, setObservation] = useState("");
@@ -30,7 +39,12 @@ export function BulkPreservationDialog({ open, onOpenChange, selectedCount, onSu
     }
   }, [open]);
 
-  const nextDate = date ? addDays(date, 15) : "";
+  // A seleção pode misturar ciclos — 15 e 30 dias no mesmo lote de baixa. Cada
+  // lote recebe a SUA data (o cálculo por lote está em `LotContext`); aqui a
+  // prévia só pode mostrar uma data quando todos compartilham a frequência.
+  const frequencias = Array.from(new Set(selectedLots.map(getLotFrequencyDays)));
+  const frequenciaUnica = frequencias.length === 1 ? frequencias[0] : null;
+  const nextDate = date && frequenciaUnica ? proximaDataPrevista(date, frequenciaUnica) : "";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +74,19 @@ export function BulkPreservationDialog({ open, onOpenChange, selectedCount, onSu
           </div>
           <div className="space-y-2">
             <Label>Próxima Preservação (automático)</Label>
-            <Input type="date" value={nextDate} readOnly className="bg-muted opacity-70" />
+            {frequenciaUnica ? (
+              <>
+                <Input type="date" value={nextDate} readOnly className="bg-muted opacity-70" />
+                <p className="text-xs text-muted-foreground">
+                  Ciclo de {frequenciaUnica} dias. A data é a segunda-feira da semana prevista.
+                </p>
+              </>
+            ) : (
+              <p className="border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+                A seleção mistura ciclos de {frequencias.sort((a, b) => a - b).join(" e ")} dias.
+                Cada lote recebe a data da própria frequência.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="bresp">Responsável</Label>

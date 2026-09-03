@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserTag } from "@/components/UserTag";
 
 interface Props {
   value: string;
@@ -35,7 +36,7 @@ export function UserSelect({ value, onChange, placeholder = "Selecione um respon
       <SelectContent>
         {options.map((u) => (
           <SelectItem key={u.id} value={u.nome}>
-            {u.nome}
+            <UserTag userId={u.id === "__legacy__" ? undefined : u.id} nome={u.nome} size={20} />
           </SelectItem>
         ))}
         {options.length === 0 && (

@@ -16,8 +16,9 @@ import { SubtaskList } from "./SubtaskList";
 import { MentionTextarea } from "./MentionTextarea";
 import { MentionText } from "./MentionText";
 import { TaskHistoryView } from "./TaskHistoryView";
+import { UserTag } from "@/components/UserTag";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 
 interface Props {
   task: Task | null;
@@ -133,14 +134,28 @@ export function TaskDetailDialog({ task, open, onOpenChange, onEdit, users }: Pr
 
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div>
-            <span className="text-muted-foreground">Responsáveis:</span>{" "}
+            <span className="text-muted-foreground">Responsáveis:</span>
             {(() => {
               const ids = getTaskAssignees(task);
-              if (ids.length === 0) return "—";
-              return ids.map((id) => users.get(id) ?? "—").join(", ");
+              if (ids.length === 0) return <span className="ml-1">—</span>;
+              return (
+                <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {ids.map((id) => (
+                    <UserTag key={id} userId={id} nome={users.get(id)} size={18} />
+                  ))}
+                </span>
+              );
             })()}
           </div>
-          <div><span className="text-muted-foreground">Criado por:</span> {task.criado_por ? users.get(task.criado_por) ?? "—" : "—"}</div>
+          <div>
+            <span className="text-muted-foreground">Criado por:</span>
+            <UserTag
+              userId={task.criado_por}
+              nome={task.criado_por ? users.get(task.criado_por) : undefined}
+              size={18}
+              className="mt-1 flex"
+            />
+          </div>
           {task.item_relacionado_descricao && (
             <div className="col-span-2"><span className="text-muted-foreground">Item:</span> {task.item_relacionado_descricao}</div>
           )}
@@ -159,7 +174,13 @@ export function TaskDetailDialog({ task, open, onOpenChange, onEdit, users }: Pr
               {comments.map((c) => (
                 <div key={c.id} className="border rounded-md p-2 bg-muted/30">
                   <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                    <span className="font-medium">{users.get(c.user_id) ?? "Usuário"}</span>
+                    <UserTag
+                      userId={c.user_id}
+                      nome={users.get(c.user_id)}
+                      vazio="Usuário"
+                      size={22}
+                      nomeClassName="font-medium text-foreground"
+                    />
                     <span>{format(new Date(c.created_at), "dd/MM/yyyy HH:mm")}</span>
                   </div>
                   <MentionText text={c.mensagem} users={users} className="text-sm whitespace-pre-wrap block" />

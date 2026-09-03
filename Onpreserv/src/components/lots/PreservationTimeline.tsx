@@ -2,6 +2,7 @@ import { Pencil, CircleDot, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Preservation } from "@/types/lot";
+import { UserTag } from "@/components/UserTag";
 
 const formatDate = (d?: string) => {
   if (!d) return "—";
@@ -117,7 +118,9 @@ export function PreservationTimeline({ preservations, canWrite, onEdit }: Props)
                 {p.responsible && (
                   <div className="flex gap-1.5">
                     <dt>Responsável</dt>
-                    <dd className="text-foreground/80">{p.responsible}</dd>
+                    <dd className="text-foreground/80">
+                      <UserTag nome={p.responsible} size={18} />
+                    </dd>
                   </div>
                 )}
               </dl>

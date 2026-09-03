@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Package, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { Package, CheckCircle2, Clock, AlertTriangle, Archive } from "lucide-react";
 import { useLots } from "@/context/LotContext";
 import { computeLotStats } from "@/lib/stats";
 import { filterLots, DEFAULT_FILTERS, type LotFiltersValue } from "@/lib/lotFilters";
@@ -61,12 +61,16 @@ const Index = () => {
       {!loading && <AlertBar alerts={alerts} />}
 
       {/* ---------- Indicadores ---------- */}
-      <section aria-label="Indicadores dos lotes" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section aria-label="Indicadores dos lotes" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
         <MetricCard
           icon={Package}
           label={filtrando ? "Lotes no filtro" : "Total de lotes"}
           value={stats.total}
-          context={filtrando ? `de ${lots.length} cadastrados` : undefined}
+          context={
+            filtrando
+              ? `de ${lots.length} cadastrados`
+              : `${stats.ativos} sob preservação`
+          }
           loading={loading}
         />
         <MetricCard
@@ -94,6 +98,14 @@ const Index = () => {
           context={stats.vencidos > 0 ? "Exige ação imediata" : "Nenhum vencido"}
           tone={stats.vencidos > 0 ? "destructive" : "success"}
           loading={loading}
+        />
+        <MetricCard
+          icon={Archive}
+          label="Inativos"
+          value={stats.inativos}
+          context={stats.inativos > 0 ? "Fora do controle de preservação" : "Nenhum inativo"}
+          loading={loading}
+          info="Lotes desativados — material que foi para o estoque ou teve a custódia transferida. Não exigem preservação e não entram no cálculo dos demais indicadores."
         />
       </section>
 

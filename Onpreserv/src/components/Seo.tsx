@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { findPage } from "@/docs/registry";
 
-const BASE_URL = "https://onpreserv.lovable.app";
+const BASE_URL = "https://onpreserv.app";
 
 const ROUTE_META: Record<string, { title: string; description: string }> = {
   "/": {

@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTasks } from "@/context/TaskContext";
 import { Task, TaskStatus, TaskPriority, TaskModulo, TASK_STATUS_LABEL, TASK_PRIORITY_LABEL, TASK_MODULO_LABEL, TASK_STATUS_ORDER, getTaskAssignees } from "@/types/task";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { Check, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 

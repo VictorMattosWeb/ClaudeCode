@@ -1,13 +1,21 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
-import { Lot, LotTipo, Preservation } from "@/types/lot";
-import { supabase } from "@/integrations/supabase/client";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { Lot, Preservation, getLotFrequencyDays, proximaDataPrevista } from "@/types/lot";
 import { useAuth } from "@/context/AuthContext";
-import { toast } from "sonner";
-import { runWithRetry } from "@/lib/runWithRetry";
+import { services } from "@/services";
 import { notifyError } from "@/lib/errorMessages";
-import { fetchAllRows } from "@/lib/fetchAllRows";
 import { registrarDiagnostico } from "@/lib/diagnosticoLotes";
 
+/**
+ * Estado dos lotes.
+ *
+ * O contexto cuida de estado de tela — carregar, guardar, avisar o React. Como
+ * os dados chegam do servidor é assunto de `services/lots`, e este arquivo não
+ * conhece Supabase, HTTP nem SQL.
+ *
+ * Antes ele misturava as três coisas: mapeamento de colunas, paginação do banco
+ * e estado de React no mesmo lugar, com o nome das colunas espalhado por sete
+ * funções. Trocar de banco exigiria reescrevê-lo inteiro.
+ */
 interface LotContextType {
   lots: Lot[];
   loading: boolean;
@@ -17,90 +25,25 @@ interface LotContextType {
   deleteLots: (ids: string[]) => Promise<void>;
   addPreservation: (lotId: string, preservation: Omit<Preservation, "id">) => Promise<boolean>;
   addPreservationToMany: (lotIds: string[], preservation: Omit<Preservation, "id">) => Promise<void>;
+  clearPreservations: (lotId: string) => Promise<boolean>;
   getLot: (id: string) => Lot | undefined;
+  refresh: () => Promise<void>;
 }
 
 const LotContext = createContext<LotContextType | undefined>(undefined);
 
-type LotRow = {
-  id: string; codigo: string; descricao: string; localizacao: string;
-  fornecedor: string; status: "ativo" | "inativo"; observacoes: string;
-  data_criacao: string; created_at: string; updated_at: string;
-  identificador_interno: string; tipo_lote: LotTipo;
-  rua: string | null; prateleira: string | null;
-  frequencia_dias: number | null;
-};
-type PresRow = {
-  id: string; lot_id: string; data: string; tipo: string; responsavel: string; observacoes: string; created_at: string;
-};
-
-const mapLot = (r: LotRow, pres: PresRow[]): Lot => ({
-  id: r.id,
-  identificadorInterno: r.identificador_interno ?? "",
-  tipoLote: (r.tipo_lote ?? "novo") as LotTipo,
-  code: r.codigo,
-  name: r.descricao,
-  location: r.localizacao ?? "",
-  rua: r.rua ?? "",
-  prateleira: r.prateleira ?? "",
-  responsible: r.fornecedor ?? "",
-  status: r.status,
-  observations: r.observacoes ?? "",
-  preservations: pres
-    .filter((p) => p.lot_id === r.id)
-    .map((p) => ({
-      id: p.id,
-      date: p.data,
-      nextDate: p.tipo,
-      observation: p.observacoes ?? "",
-      responsible: p.responsavel,
-    }))
-    .sort((a, b) => {
-      const byDate = a.date.localeCompare(b.date);
-      if (byDate !== 0) return byDate;
-      const pa = pres.find((p) => p.id === a.id)?.created_at ?? "";
-      const pb = pres.find((p) => p.id === b.id)?.created_at ?? "";
-      return pa.localeCompare(pb);
-    }),
-  createdAt: r.created_at,
-  frequenciaDias: r.frequencia_dias ?? null,
-});
-
 export function LotProvider({ children }: { children: React.ReactNode }) {
   const { session, authReady } = useAuth();
   const [lots, setLots] = useState<Lot[]>([]);
-  const [presRows, setPresRows] = useState<PresRow[]>([]);
-  const [lotRows, setLotRows] = useState<LotRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
-    const [l, p] = await Promise.all([
-      fetchAllRows<LotRow>(() =>
-        supabase
-          .from("lots" as any)
-          .select("*")
-          .order("created_at", { ascending: false })
-          // Desempate obrigatório: `created_at` repete em importações em lote.
-          .order("id", { ascending: true }),
-      ),
-      fetchAllRows<PresRow>(() =>
-        supabase
-          .from("preservations" as any)
-          .select("*")
-          .order("data", { ascending: true })
-          .order("created_at", { ascending: true })
-          // Idem: uma baixa em lote grava várias preservações no mesmo instante,
-          // e perder uma delas altera o status de preservação do lote.
-          .order("id", { ascending: true }),
-      ),
-    ]);
-    setLotRows(l);
-    setPresRows(p);
+      setLots(await services.lots.listar());
     } catch (err) {
-      // Sem isto, qualquer erro de rede ou de permissão abortava a carga em
-      // silêncio: a lista ficava com o conteúdo anterior (ou vazia) e o usuário
-      // não tinha como saber que estava vendo dados incompletos.
+      // Sem isto, uma falha de rede ou de permissão abortava a carga em
+      // silêncio: a lista ficava com o conteúdo anterior e o usuário não tinha
+      // como saber que estava vendo dados incompletos.
       notifyError(err, "Não foi possível carregar os lotes. Os dados exibidos podem estar incompletos.");
     } finally {
       setLoading(false);
@@ -109,139 +52,107 @@ export function LotProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!authReady) return;
-    if (!session) { setLots([]); setLoading(false); return; }
+    if (!session) {
+      setLots([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    refresh();
-
-    const ch = supabase
-      .channel(`lots-realtime:${Math.random().toString(36).slice(2)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "lots" }, () => refresh())
-      .on("postgres_changes", { event: "*", schema: "public", table: "preservations" }, () => refresh())
-      .subscribe();
-
-    return () => { supabase.removeChannel(ch); };
+    void refresh();
+    return services.lots.observar(() => void refresh());
   }, [authReady, session, refresh]);
 
-  useEffect(() => {
-    setLots(lotRows.map((r) => mapLot(r, presRows)));
-  }, [lotRows, presRows]);
-
-  // Ferramenta de diagnóstico no console (só em desenvolvimento). A referência
-  // é lida na hora da chamada, então sempre reflete o estado atual.
+  // Diagnóstico da busca no console, só em desenvolvimento. A referência é lida
+  // na hora da chamada, então sempre reflete o estado atual.
   const lotsRef = useRef<Lot[]>([]);
   lotsRef.current = lots;
   useEffect(() => {
     registrarDiagnostico(() => lotsRef.current);
   }, []);
 
-  const addLot: LotContextType["addLot"] = async (data) => {
-    const { error } = await runWithRetry(async () => await supabase.from("lots" as any).insert({
-      codigo: data.code,
-      descricao: (data.name ?? "").toUpperCase(),
-      localizacao: data.location ?? "",
-      rua: data.rua ?? "",
-      prateleira: data.prateleira ?? "",
-      fornecedor: data.responsible ?? "",
-      status: data.status ?? "ativo",
-      observacoes: data.observations ?? "",
-      tipo_lote: data.tipoLote ?? "novo",
-      // Só entra no payload quando há valor. A coluna `frequencia_dias` pode
-      // ainda não existir no banco (migration pendente), e mandar uma coluna
-      // inexistente derruba o INSERT inteiro.
-      ...(data.frequenciaDias != null ? { frequencia_dias: data.frequenciaDias } : {}),
-      criado_por: session?.user.id,
-    }));
-    if (error) {
-      notifyError(error, "Não foi possível criar o lote.");
+  /**
+   * Executa uma escrita e devolve se deu certo.
+   *
+   * O serviço lança em erro; a interface trabalha com booleano. A tradução fica
+   * aqui, num lugar só, em vez de repetida em cada função — e com ela a
+   * garantia de que nenhuma falha passa sem aviso ao usuário.
+   */
+  const executar = useCallback(async (acao: () => Promise<void>, mensagemDeErro: string): Promise<boolean> => {
+    try {
+      await acao();
+      return true;
+    } catch (err) {
+      notifyError(err, mensagemDeErro);
       return false;
     }
-    return true;
-  };
+  }, []);
 
-  const updateLot: LotContextType["updateLot"] = async (id, data) => {
-    const patch: any = {};
-    if (data.code !== undefined) patch.codigo = data.code;
-    if (data.name !== undefined) patch.descricao = (data.name ?? "").toUpperCase();
-    if (data.location !== undefined) patch.localizacao = data.location;
-    if (data.rua !== undefined) patch.rua = data.rua;
-    if (data.prateleira !== undefined) patch.prateleira = data.prateleira;
-    if (data.responsible !== undefined) patch.fornecedor = data.responsible;
-    if (data.status !== undefined) patch.status = data.status;
-    if (data.observations !== undefined) patch.observacoes = data.observations;
-    if (data.tipoLote !== undefined) patch.tipo_lote = data.tipoLote;
-    // Só entra no patch quando o formulário enviou o campo — por dois motivos:
-    // o gatilho no banco rejeita a alteração vinda de quem não é administrador,
-    // e a coluna pode ainda não existir (migration pendente).
-    if (data.frequenciaDias !== undefined) patch.frequencia_dias = data.frequenciaDias;
-    const { error } = await runWithRetry(async () => await supabase.from("lots" as any).update(patch).eq("id", id));
-    if (error) {
-      notifyError(error, "Não foi possível atualizar o lote.");
-      return false;
-    }
-    return true;
-  };
-
-  const deleteLot: LotContextType["deleteLot"] = async (id) => {
-    const { error } = await supabase.from("lots" as any).delete().eq("id", id);
-    if (error) notifyError(error, "Não foi possível excluir o lote.");
-  };
-
-  const deleteLots: LotContextType["deleteLots"] = async (ids) => {
-    const { error } = await supabase.from("lots" as any).delete().in("id", ids);
-    if (error) notifyError(error, "Não foi possível excluir os lotes selecionados.");
-  };
-
-  const addPreservation: LotContextType["addPreservation"] = async (lotId, p) => {
-    const { error } = await runWithRetry(async () => await supabase.from("preservations" as any).insert({
-      lot_id: lotId,
-      data: p.date,
-      tipo: p.nextDate, // armazenamos next date em tipo p/ preservar API
-      responsavel: p.responsible,
-      observacoes: p.observation ?? "",
-      criado_por: session?.user.id,
-    }));
-    if (error) {
-      notifyError(error, "Não foi possível registrar a preservação.");
-      return false;
-    }
-    return true;
-  };
-
-  const addPreservationToMany: LotContextType["addPreservationToMany"] = async (lotIds, p) => {
-    const uniqueIds = Array.from(new Set(lotIds)).filter(Boolean);
-    if (uniqueIds.length === 0) return;
-    const rows = uniqueIds.map((lot_id) => ({
-      lot_id,
-      data: p.date,
-      tipo: p.nextDate,
-      responsavel: p.responsible,
-      observacoes: p.observation ?? "",
-      criado_por: session?.user.id,
-    }));
-    // Inserir em lotes de 200 para evitar payloads grandes / timeouts
-    const CHUNK = 200;
-    for (let i = 0; i < rows.length; i += CHUNK) {
-      const slice = rows.slice(i, i + CHUNK);
-      const { error } = await runWithRetry(async () => await supabase.from("preservations" as any).insert(slice));
-      if (error) {
-        notifyError(error, "Não foi possível registrar as preservações.");
-        throw error;
-      }
-    }
-    await refresh();
-  };
-
-  const getLot = (id: string) => lots.find((l) => l.id === id);
-
-  return (
-    <LotContext.Provider value={{ lots, loading, addLot, updateLot, deleteLot, deleteLots, addPreservation, addPreservationToMany, getLot }}>
-      {children}
-    </LotContext.Provider>
+  /**
+   * Preenche a próxima data prevista conforme a frequência DO LOTE.
+   *
+   * O formulário não tem como saber a frequência de cada lote — e na baixa em
+   * lote são várias, possivelmente diferentes. O cálculo pertence aqui, onde a
+   * lista de lotes está disponível.
+   */
+  const comProximaData = useCallback(
+    (lotId: string, p: Omit<Preservation, "id">): Omit<Preservation, "id"> => {
+      const lote = lots.find((l) => l.id === lotId);
+      if (!lote || !p.date) return p;
+      return { ...p, nextDate: proximaDataPrevista(p.date, getLotFrequencyDays(lote)) };
+    },
+    [lots],
   );
+
+  const valor: LotContextType = {
+    lots,
+    loading,
+    refresh,
+
+    addLot: (lot) => executar(() => services.lots.criar(lot), "Não foi possível criar o lote."),
+
+    updateLot: (id, data) =>
+      executar(() => services.lots.atualizar(id, data), "Não foi possível atualizar o lote."),
+
+    deleteLot: async (id) => {
+      await executar(() => services.lots.excluir(id), "Não foi possível excluir o lote.");
+    },
+
+    deleteLots: async (ids) => {
+      await executar(
+        () => services.lots.excluirVarios(ids),
+        "Não foi possível excluir os lotes selecionados.",
+      );
+    },
+
+    addPreservation: (lotId, p) =>
+      executar(
+        () => services.lots.registrarPreservacao(lotId, comProximaData(lotId, p)),
+        "Não foi possível registrar a preservação.",
+      ),
+
+    addPreservationToMany: async (lotIds, p) => {
+      // Cada lote recebe a SUA próxima data: uma baixa em lote pode misturar
+      // itens de 15 e de 30 dias, e uma data única estaria errada para metade.
+      const ok = await executar(async () => {
+        for (const id of lotIds) {
+          await services.lots.registrarPreservacao(id, comProximaData(id, p));
+        }
+      }, "Não foi possível registrar as preservações.");
+      // Quem chama espera a exceção para não exibir o toast de sucesso.
+      if (!ok) throw new Error("falha ao registrar preservações");
+    },
+
+    clearPreservations: (lotId) =>
+      executar(() => services.lots.limparHistorico(lotId), "Não foi possível limpar o histórico."),
+
+    getLot: (id) => lots.find((l) => l.id === id),
+  };
+
+  return <LotContext.Provider value={valor}>{children}</LotContext.Provider>;
 }
 
 export function useLots() {
   const ctx = useContext(LotContext);
-  if (!ctx) throw new Error("useLots must be used within LotProvider");
+  if (!ctx) throw new Error("useLots deve ser usado dentro de LotProvider");
   return ctx;
 }

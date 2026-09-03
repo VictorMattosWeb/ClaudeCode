@@ -27,7 +27,7 @@ import { TaskStatsPanel } from "@/components/tasks/TaskStatsPanel";
 import { LabelManagerDialog } from "@/components/tasks/LabelManagerDialog";
 import { BoardGrid } from "@/components/tasks/BoardGrid";
 import { TaskImportDialog } from "@/components/tasks/TaskImportDialog";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { toast } from "sonner";
 import {
   Breadcrumb,

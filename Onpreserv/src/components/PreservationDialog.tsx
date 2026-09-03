@@ -5,22 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UserSelect } from "@/components/UserSelect";
-import { addDays } from "@/types/lot";
+import { getLotFrequencyDays, proximaDataPrevista } from "@/types/lot";
+import type { Lot } from "@/types/lot";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** O lote que está sendo preservado: é dele que sai a frequência. */
+  lot: Lot;
   onSubmit: (data: { date: string; nextDate: string; observation: string; responsible: string }) => Promise<boolean>;
 }
 
-export function PreservationDialog({ open, onOpenChange, onSubmit }: Props) {
+export function PreservationDialog({ open, onOpenChange, lot, onSubmit }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [observation, setObservation] = useState("");
   const [responsible, setResponsible] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const nextDate = date ? addDays(date, 15) : "";
+  // A frequência é a DESTE lote — 30 para os PN, 15 para os demais, ou a que o
+  // administrador configurou. Antes eram 15 dias fixos aqui, e a data
+  // apresentada como "automático" contradizia o ciclo do próprio lote.
+  const frequencia = getLotFrequencyDays(lot);
+  const nextDate = date ? proximaDataPrevista(date, frequencia) : "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +56,10 @@ export function PreservationDialog({ open, onOpenChange, onSubmit }: Props) {
           <div className="space-y-2">
             <Label>Próxima Preservação (automático)</Label>
             <Input type="date" value={nextDate} readOnly className="bg-muted opacity-70" />
+            <p className="text-xs text-muted-foreground">
+              Ciclo de {frequencia} dias. A data é a segunda-feira da semana prevista — preservar
+              em qualquer dia daquela semana cumpre o ciclo.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="presp">Responsável</Label>

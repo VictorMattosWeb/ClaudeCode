@@ -42,20 +42,28 @@ export interface Lot {
 export type LotStatus = "preserved" | "upcoming" | "overdue" | "none";
 
 // =============================================================================
-// Status de preservação por SEMANA DE REFERÊNCIA (segunda a domingo)
+// Ciclo de preservação
 // -----------------------------------------------------------------------------
-// A regra não olha mais para um dia específico. O ciclo é a semana:
+// Regra alinhada com a fiscalização:
 //
-//   * Qualquer preservação registrada DENTRO da semana corrente cumpre a semana,
-//     tenha sido feita na segunda ou no domingo.
-//   * Enquanto a semana corrente não terminar, o lote não está atrasado — ainda
-//     há tempo de executar.
-//   * Uma semana que termina sem nenhum registro é que passa a contar como
-//     vencida.
-//   * A virada da segunda-feira abre um ciclo novo automaticamente.
+//   1. Material novo tem até 7 DIAS a partir da chegada para a PRIMEIRA
+//      preservação. Antes disso não há histórico, então a referência é a data
+//      de cadastro do lote.
 //
-// O histórico continua guardando e exibindo a data exata de cada preservação;
-// o que mudou é apenas como o STATUS é derivado dela.
+//   2. Registrada a primeira, ela passa a ser a referência: cada preservação
+//      define o prazo da seguinte.
+//
+//   3. A frequência recorrente é de 15 DIAS por padrão — o que antes era ciclo
+//      semanal. Os itens de 30 dias (PN-32, PN-34, PN-36 e os configurados na
+//      ficha do lote) permanecem em 30.
+//
+//   4. A data prevista é sempre a SEGUNDA-FEIRA da semana em que a data
+//      teórica cai. A frequência é respeitada como sempre; o que se registra e
+//      se exibe é a semana, não o dia. Preservar em qualquer dia daquela semana
+//      cumpre o ciclo — ver `proximaDataPrevista`.
+//
+// Os quatro status continuam os mesmos — `preserved`, `upcoming`, `overdue` e
+// `none`. O que mudou foi apenas como são calculados.
 //
 // Vale só para lotes. O cronograma tem regra própria, por data prevista, e não
 // é afetado por nada aqui.
@@ -63,12 +71,38 @@ export type LotStatus = "preserved" | "upcoming" | "overdue" | "none";
 
 const MS_POR_DIA = 86_400_000;
 
+/** Prazo para a primeira preservação, contado da chegada do material. */
+export const PRAZO_PRIMEIRA_PRESERVACAO_DIAS = 7;
+
+/**
+ * Data em que a regra da primeira preservação passou a valer.
+ *
+ * Ela só se aplica ao material que chega A PARTIR daqui. Um lote cadastrado
+ * meses atrás e nunca preservado não pode aparecer como "vencido há 200 dias"
+ * de um dia para o outro — a cobrança não existia quando ele entrou, e o
+ * quadro amanheceria vermelho sem que nada tivesse acontecido no campo.
+ *
+ * Para os lotes anteriores, mudou apenas a frequência: de semanal para 15 dias.
+ * Enquanto não tiverem a primeira preservação, seguem em "sem preservação",
+ * como antes.
+ */
+export const REGRA_PRIMEIRA_PRESERVACAO_DESDE = "2026-09-02";
+
+/** Frequência recorrente padrão, em dias corridos. */
+export const FREQUENCIA_PADRAO_DIAS = 15;
+
+/** Frequência dos itens de ciclo longo. */
+export const FREQUENCIA_LONGA_DIAS = 30;
+
+/** Teto da antecedência do aviso de vencimento. */
+export const CICLO_AVISO_MAXIMO_DIAS = 5;
+
 /**
  * Interpreta "YYYY-MM-DD" no fuso local.
  *
  * `new Date("2026-08-24")` seria lido como meia-noite UTC — que no horário de
  * Brasília é 21h do dia 23. Uma preservação feita na segunda cairia no domingo
- * anterior e a semana inteira sairia errada.
+ * anterior e o prazo inteiro sairia errado.
  */
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.slice(0, 10).split("-").map(Number);
@@ -78,32 +112,57 @@ function parseLocalDate(dateStr: string): Date {
 const toIso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-/** Segunda-feira da semana que contém a data. Domingo pertence à semana que termina nele. */
-export function startOfWeek(date: Date): Date {
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const dia = d.getDay(); // 0=dom, 1=seg ... 6=sáb
-  const recuo = dia === 0 ? 6 : dia - 1;
-  d.setDate(d.getDate() - recuo);
-  return d;
+/** Zera a hora, para comparar dias e não instantes. */
+const soData = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+/** Sábado ou domingo. */
+export function isWeekend(d: Date): boolean {
+  const dia = d.getDay();
+  return dia === 0 || dia === 6;
 }
 
-/** Domingo que fecha a semana da data informada. */
-export function endOfWeek(date: Date): Date {
-  const ini = startOfWeek(date);
-  ini.setDate(ini.getDate() + 6);
-  return ini;
+/** Rola a data para o próximo dia útil, se cair no fim de semana. */
+export function nextBusinessDay(d: Date): Date {
+  const r = soData(d);
+  while (isWeekend(r)) r.setDate(r.getDate() + 1);
+  return r;
 }
 
-/** Semana de referência de hoje, em ISO. Útil para exibir o período do ciclo. */
-export function currentWeekRange(hoje: Date = new Date()): { inicio: string; fim: string } {
-  return { inicio: toIso(startOfWeek(hoje)), fim: toIso(endOfWeek(hoje)) };
+/** Soma dias de calendário. */
+export function addCalendarDays(d: Date, dias: number): Date {
+  const r = soData(d);
+  r.setDate(r.getDate() + dias);
+  return r;
+}
+
+/** Diferença em dias de calendário, ignorando a hora. */
+export function calendarDaysBetween(inicio: Date, fim: Date): number {
+  return Math.round((soData(fim).getTime() - soData(inicio).getTime()) / MS_POR_DIA);
+}
+
+/**
+ * Antecedência do aviso, proporcional ao ciclo.
+ *
+ * Cinco dias fixos avisariam cedo demais num prazo de 7 dias — o lote nasceria
+ * quase em alerta. Um terço do ciclo, limitado a cinco dias, dá 3 para o prazo
+ * inicial, 5 para o de 15 e 5 para o de 30.
+ */
+export function avisoDoCiclo(dias: number): number {
+  return Math.min(CICLO_AVISO_MAXIMO_DIAS, Math.ceil(dias / 3));
+}
+
+/** Registro de preservação mais recente do lote, ou null. */
+function ultimaPreservacaoRegistro(lot: Lot): Preservation | null {
+  let maior: Preservation | null = null;
+  for (const p of lot.preservations) {
+    if (!p.date) continue;
+    if (!maior || parseLocalDate(p.date) > parseLocalDate(maior.date)) maior = p;
+  }
+  return maior;
 }
 
 /** Data da preservação mais recente do lote, ou null. */
 function ultimaPreservacao(lot: Lot): Date | null {
-  if (lot.preservations.length === 0) return null;
-  // O array vem em ordem cronológica, mas não custa não depender disso: uma
-  // edição de registro pode reordenar sem que a lista seja reordenada.
   let maior: Date | null = null;
   for (const p of lot.preservations) {
     if (!p.date) continue;
@@ -113,260 +172,269 @@ function ultimaPreservacao(lot: Lot): Date | null {
   return maior;
 }
 
-/**
- * Quantas semanas inteiras se passaram desde a semana da última preservação.
- *
- *   0 → a última preservação é desta semana (ciclo cumprido)
- *   1 → foi na semana passada; a semana atual ainda está aberta
- *  ≥2 → ao menos uma semana fechou sem registro
- */
-export function weeksSinceLastPreservation(lot: Lot, hoje: Date = new Date()): number | null {
-  const ultima = ultimaPreservacao(lot);
-  if (!ultima) return null;
-  const semanaUltima = startOfWeek(ultima);
-  const semanaAtual = startOfWeek(hoje);
-  return Math.round((semanaAtual.getTime() - semanaUltima.getTime()) / (7 * MS_POR_DIA));
-}
-
-// =============================================================================
-// Ciclo de preservação por lote
 // -----------------------------------------------------------------------------
-// A semana é o ciclo padrão. Alguns lotes fogem à regra e são preservados a
-// cada 30 DIAS CORRIDOS — hoje, os painéis PN-32, PN-34 e PN-36.
-//
-// A contagem é em dias de calendário, sábados e domingos incluídos. O único
-// tratamento de fim de semana é no vencimento: se a data calculada cair num
-// sábado ou domingo, ela rola para a segunda-feira seguinte, porque não há
-// equipe em campo para executar.
-//
-// A identificação é por nome/código, o mesmo mecanismo que `isCableLot` já usa
-// para decidir sobre a sílica gel. Não é o ideal: o correto seria uma coluna no
-// banco descrevendo o ciclo de cada lote, e aí renomear um lote não mudaria a
-// regra de preservação dele sem querer. Fica registrado como dívida.
-// =============================================================================
-
-export type CicloTipo = "semanal" | "dias_corridos";
+// Frequência do lote
+// -----------------------------------------------------------------------------
 
 export interface CicloPreservacao {
-  tipo: CicloTipo;
-  /** Quantidade de dias corridos do ciclo. Só para `dias_corridos`. */
-  dias?: number;
+  /** Dias corridos entre preservações. */
+  dias: number;
   label: string;
 }
 
-export const CICLO_SEMANAL: CicloPreservacao = { tipo: "semanal", label: "Semanal" };
-
-/** Ciclo de 30 dias corridos, com vencimento rolado para dia útil. */
-export const CICLO_30_DIAS: CicloPreservacao = {
-  tipo: "dias_corridos",
-  dias: 30,
-  label: "30 dias",
-};
-
 /**
- * Lotes com ciclo de 30 dias corridos.
+ * Lotes de ciclo longo identificados por nome/código.
  *
- * `\b` nas duas pontas evita que "PN-345" case com "PN-34". O separador é
- * opcional para tolerar "PN 34", "PN-34" e "PN34".
+ * Rede de segurança para lotes cadastrados antes do campo `frequenciaDias`
+ * existir. A migration preenche o campo; a partir daí esta lista deixa de ser
+ * consultada. `\b` nas pontas evita que "PN-345" case com "PN-34".
  */
-const PADROES_CICLO_30_DIAS: RegExp[] = [
+const PADROES_CICLO_LONGO: RegExp[] = [
   /\bpn[-\s_]?32\b/,
   /\bpn[-\s_]?34\b/,
   /\bpn[-\s_]?36\b/,
 ];
 
-/** Texto normalizado do lote, sem acentos, para casar os padrões. */
 function chaveDoLote(lot: Lot): string {
   return `${lot.name} ${lot.code} ${lot.identificadorInterno}`
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 }
 
-/**
- * Ciclo de preservação do lote.
- *
- * A fonte da verdade é o campo `frequenciaDias`, definido por administrador na
- * ficha do lote. A lista de identificadores acima ficou apenas como rede de
- * segurança para lotes cadastrados antes do campo existir e ainda não migrados
- * — a migration preenche o campo, e a partir daí ela deixa de ser consultada.
- */
-export function getLotCycle(lot: Lot): CicloPreservacao {
-  const dias = lot.frequenciaDias;
-  if (typeof dias === "number" && dias > 0) {
-    return {
-      tipo: "dias_corridos",
-      dias,
-      label: dias === 1 ? "Diário" : `${dias} dias`,
-    };
-  }
-  // `null` explícito significa "semanal, decidido por alguém" — não cai no
-  // fallback. Só `undefined` (lote nunca configurado) consulta a lista antiga.
-  if (dias === null) return CICLO_SEMANAL;
+/** Dias entre preservações deste lote. */
+export function getLotFrequencyDays(lot: Lot): number {
+  const configurado = lot.frequenciaDias;
+  if (typeof configurado === "number" && configurado > 0) return configurado;
+
+  // `null` explícito é escolha de administrador: vale o padrão, sem consultar
+  // a lista legada. Só `undefined` (lote nunca configurado) cai no fallback.
+  if (configurado === null) return FREQUENCIA_PADRAO_DIAS;
 
   const chave = chaveDoLote(lot);
-  return PADROES_CICLO_30_DIAS.some((re) => re.test(chave)) ? CICLO_30_DIAS : CICLO_SEMANAL;
+  return PADROES_CICLO_LONGO.some((re) => re.test(chave))
+    ? FREQUENCIA_LONGA_DIAS
+    : FREQUENCIA_PADRAO_DIAS;
+}
+
+export function getLotCycle(lot: Lot): CicloPreservacao {
+  const dias = getLotFrequencyDays(lot);
+  return { dias, label: dias === 1 ? "Diário" : `${dias} dias` };
 }
 
 /** Opções oferecidas no formulário do lote. */
 export const FREQUENCIA_OPCOES: { valor: number | null; label: string }[] = [
-  { valor: null, label: "Semanal (padrão)" },
-  { valor: 15, label: "15 dias" },
+  { valor: null, label: `${FREQUENCIA_PADRAO_DIAS} dias (padrão)` },
+  { valor: 7, label: "7 dias" },
   { valor: 30, label: "30 dias" },
   { valor: 60, label: "60 dias" },
   { valor: 90, label: "90 dias" },
 ];
 
-/** Sábado ou domingo. */
-export function isWeekend(d: Date): boolean {
-  const dia = d.getDay();
-  return dia === 0 || dia === 6;
+// -----------------------------------------------------------------------------
+// Prazo e status
+// -----------------------------------------------------------------------------
+
+/** Referência a partir da qual o próximo prazo é contado. */
+export interface ReferenciaCiclo {
+  data: Date;
+  /** Verdadeiro quando ainda não há preservação e a referência é a chegada. */
+  primeira: boolean;
+  /** Dias de prazo a partir da referência. */
+  prazoDias: number;
 }
 
-/**
- * Rola a data para o próximo dia útil, se cair no fim de semana.
- *
- * Sábado vira segunda (+2), domingo vira segunda (+1). Uma data já útil é
- * devolvida sem alteração.
- */
-export function nextBusinessDay(d: Date): Date {
-  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  while (isWeekend(r)) r.setDate(r.getDate() + 1);
-  return r;
-}
+export function getLotCycleReference(lot: Lot): ReferenciaCiclo | null {
+  // Lote inativo não tem ciclo: não vence, não é cobrado e não entra em
+  // nenhuma conta. Sem esta saída, um lote desativado seguia acumulando
+  // atraso por uma preservação que ninguém vai fazer.
+  //
+  // Como todo o resto — vencimento, prazo, dias restantes, status — parte
+  // daqui, basta cortar neste ponto para que nada mais o considere.
+  if (lot.status !== "ativo") return null;
 
-/** Soma dias de calendário. */
-export function addCalendarDays(d: Date, dias: number): Date {
-  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  r.setDate(r.getDate() + dias);
-  return r;
-}
-
-/** Diferença em dias de calendário entre duas datas, ignorando a hora. */
-export function calendarDaysBetween(inicio: Date, fim: Date): number {
-  const a = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate()).getTime();
-  const b = new Date(fim.getFullYear(), fim.getMonth(), fim.getDate()).getTime();
-  return Math.round((b - a) / MS_POR_DIA);
-}
-
-/**
- * Vencimento do ciclo: última preservação + N dias corridos, rolado para o
- * próximo dia útil se cair no fim de semana.
- */
-export function getNextCycleDueDate(lot: Lot): Date | null {
-  const ciclo = getLotCycle(lot);
-  if (ciclo.tipo !== "dias_corridos" || !ciclo.dias) return null;
   const ultima = ultimaPreservacao(lot);
-  if (!ultima) return null;
-  return nextBusinessDay(addCalendarDays(ultima, ciclo.dias));
+  if (ultima) {
+    return { data: ultima, primeira: false, prazoDias: getLotFrequencyDays(lot) };
+  }
+
+  // Nunca preservado: a chegada do material é a referência, com o prazo curto
+  // da primeira preservação — mas só para o material que chegou depois de a
+  // regra passar a valer.
+  if (!lot.createdAt) return null;
+  const chegada = lot.createdAt.slice(0, 10);
+  if (chegada < REGRA_PRIMEIRA_PRESERVACAO_DESDE) return null;
+
+  return {
+    data: parseLocalDate(lot.createdAt),
+    primeira: true,
+    prazoDias: PRAZO_PRIMEIRA_PRESERVACAO_DIAS,
+  };
 }
 
 /**
- * Dias corridos restantes até o vencimento do ciclo.
- * Negativo quando já passou. `null` para ciclo semanal ou lote sem registro.
+ * Próxima data prevista a partir de uma preservação.
+ *
+ * -----------------------------------------------------------------------------
+ * A previsão é uma SEMANA, e a segunda-feira é o nome dela.
+ * -----------------------------------------------------------------------------
+ *
+ * A frequência é respeitada como sempre — 15 ou 30 dias corridos a partir do
+ * registro. O que muda é o passo seguinte: em vez de exibir a data teórica, o
+ * sistema identifica a semana em que ela cai e usa a segunda-feira dessa semana
+ * como referência.
+ *
+ *   última preservação 24/08  →  +15 dias  →  teórica: quarta 09/09
+ *   semana da teórica: segunda 07/09 a domingo 13/09
+ *   próxima preservação: 07/09
+ *
+ * Preservar em qualquer dia de 07/09 a 13/09 cumpre o ciclo. Assim a
+ * preservação deixa de ser cobrada por um dia exato e passa a ser cobrada por
+ * uma janela semanal, o que agrupa todos os lotes por semana.
+ *
+ * A segunda-feira é sempre dia útil, então o desvio de fim de semana que a
+ * regra anterior aplicava deixou de ter efeito aqui.
+ */
+export function proximaDataPrevista(dataIso: string, frequenciaDias: number): string {
+  const teorica = addCalendarDays(parseLocalDate(dataIso), frequenciaDias);
+  return toIso(startOfWeek(teorica));
+}
+
+/**
+ * Data em que a próxima preservação vence.
+ *
+ * Quando existe preservação registrada, vale a data AGENDADA nela — não o
+ * recálculo a partir da frequência atual.
+ *
+ * A distinção importa na transição de regra: um lote preservado em 24/08 tinha
+ * 31/08 agendado pela regra semanal. Recalcular daria 08/09, jogando para
+ * frente um compromisso que já estava firmado. O que estava agendado vale; a
+ * frequência nova rege dali em diante, quando aquela preservação for feita.
+ *
+ * A exceção é o ciclo longo (os PN, de 30 dias). Ver `agendadaEhConfiavel`.
+ */
+export function getLotDueDate(lot: Lot, hoje: Date = new Date()): Date | null {
+  const ref = getLotCycleReference(lot);
+  if (!ref) return null;
+
+  // Segunda-feira da semana em que a data teórica cai. Ver `proximaDataPrevista`.
+  const pelaFrequencia = startOfWeek(addCalendarDays(ref.data, ref.prazoDias));
+  if (ref.primeira) return pelaFrequencia;
+
+  const agendada = ultimaPreservacaoRegistro(lot)?.nextDate;
+  if (!agendada || !agendadaEhConfiavel(ref, agendada)) return pelaFrequencia;
+
+  // A agendada também vale pela semana dela: um registro antigo pode trazer
+  // qualquer dia, e a referência exibida é sempre a segunda.
+  const dataAgendada = startOfWeek(parseLocalDate(agendada));
+  return endOfWeek(dataAgendada) >= soData(hoje) ? dataAgendada : pelaFrequencia;
+}
+
+/**
+ * A data agendada no registro merece confiança?
+ *
+ * Só quando ela é compatível com o ciclo do lote. A regra antiga agendava
+ * sempre a segunda-feira seguinte, o que para um lote de 15 dias é uma
+ * antecipação plausível — e foi um compromisso de fato assumido em campo.
+ *
+ * Para o ciclo de 30 dias não é: um PN preservado em 03/08 ficou com 31/08
+ * gravado, quatro semanas antes do que a frequência dele manda. Nenhuma agenda
+ * da regra semanal representa um ciclo de 30 dias, então para esses lotes o
+ * campo é resíduo, e o vencimento sai sempre do cálculo: 03/08 + 30 = 02/09.
+ */
+function agendadaEhConfiavel(ref: ReferenciaCiclo, _agendada: string): boolean {
+  return ref.prazoDias < FREQUENCIA_LONGA_DIAS;
+}
+
+/** A mesma data, em ISO, para exibição e comparação. */
+export function getLotNextDueDate(lot: Lot, hoje: Date = new Date()): string | null {
+  const d = getLotDueDate(lot, hoje);
+  return d ? toIso(d) : null;
+}
+
+/** Segunda-feira da semana que contém a data. Domingo fecha a semana anterior. */
+export function startOfWeek(date: Date): Date {
+  const d = soData(date);
+  const dia = d.getDay(); // 0=dom, 1=seg ... 6=sáb
+  d.setDate(d.getDate() - (dia === 0 ? 6 : dia - 1));
+  return d;
+}
+
+/** Domingo que fecha a semana da data. */
+export function endOfWeek(date: Date): Date {
+  const d = startOfWeek(date);
+  d.setDate(d.getDate() + 6);
+  return d;
+}
+
+/**
+ * Prazo real de cobrança: o fim da SEMANA do vencimento.
+ *
+ * -----------------------------------------------------------------------------
+ * A data prevista aponta o dia; a semana é o que define se foi cumprido.
+ * -----------------------------------------------------------------------------
+ *
+ * Preservar é trabalho de campo, e prender a cobrança ao dia exato transforma
+ * qualquer remanejamento de equipe em atraso. Se o vencimento cai numa
+ * terça-feira, a preservação feita na quinta da mesma semana cumpriu o ciclo. Só
+ * quando a semana fecha sem registro é que o lote passa a vencido.
+ */
+export function getLotDeadline(lot: Lot, hoje: Date = new Date()): Date | null {
+  const venc = getLotDueDate(lot, hoje);
+  return venc ? endOfWeek(venc) : null;
+}
+
+/**
+ * Dias restantes até o fim da semana do vencimento.
+ * Negativo quando a semana já fechou sem preservação.
  */
 export function getDaysLeftInCycle(lot: Lot, hoje: Date = new Date()): number | null {
-  const vencimento = getNextCycleDueDate(lot);
-  if (!vencimento) return null;
-  return calendarDaysBetween(hoje, vencimento);
+  const prazo = getLotDeadline(lot, hoje);
+  return prazo ? calendarDaysBetween(hoje, prazo) : null;
 }
 
 /**
- * Antecedência, em dias, com que um ciclo longo passa a pedir ação.
- * Cinco dias dão tempo de programar a equipe sem alarme prematuro.
- */
-export const CICLO_AVISO_DIAS = 5;
-
-/**
- * Data prevista para a próxima preservação, conforme o ciclo do lote.
+ * Status do lote.
  *
- * Substitui a leitura de `preservation.nextDate` na interface. Aquele campo é
- * gravado no momento do registro e sempre apontou para a próxima segunda —
- * correto no ciclo semanal, errado nos lotes de 30 dias, que mostravam uma data
- * a semanas de distância da real.
+ *   overdue   — passou do vencimento
+ *   upcoming  — dentro da antecedência do aviso
+ *   none      — nunca preservado e ainda dentro do prazo inicial
+ *   preserved — preservado e dentro do prazo
  *
- * O valor gravado continua no histórico, como registro do que foi combinado na
- * época; o que a tela exibe agora é o vencimento calculado pela regra vigente.
- */
-export function getLotNextDueDate(lot: Lot): string | null {
-  const ciclo = getLotCycle(lot);
-
-  if (ciclo.tipo === "dias_corridos") {
-    const vencimento = getNextCycleDueDate(lot);
-    return vencimento ? toIso(vencimento) : null;
-  }
-
-  const ultima = ultimaPreservacao(lot);
-  if (!ultima) return null;
-
-  // Semanal: o ciclo seguinte abre na segunda da semana posterior à da última
-  // preservação — que já é dia útil, sem necessidade de rolagem.
-  const proximaSegunda = startOfWeek(ultima);
-  proximaSegunda.setDate(proximaSegunda.getDate() + 7);
-  return toIso(proximaSegunda);
-}
-
-/**
- * Status do lote pela semana de referência.
- *
- *   none      — nunca teve preservação
- *   preserved — já foi preservado nesta semana
- *   upcoming  — a semana está aberta e ainda não houve registro
- *   overdue   — alguma semana fechou sem registro
- *
- * Uma preservação registrada com data futura conta como cumprida na semana
- * dela; se for de uma semana adiante, a semana atual segue aberta.
+ * `none` continua significando "sem preservação registrada", mas agora escala
+ * para `upcoming` e `overdue` conforme o prazo de 7 dias se aproxima e vence —
+ * antes um lote recém-chegado ficava indefinidamente em `none`, sem cobrança.
  */
 export function getLotPreservationStatus(lot: Lot, hoje: Date = new Date()): LotStatus {
-  if (lot.preservations.length === 0) return "none";
+  const ref = getLotCycleReference(lot);
+  if (!ref) return "none";
 
-  const ciclo = getLotCycle(lot);
+  const venc = getLotDueDate(lot, hoje);
+  const prazo = getLotDeadline(lot, hoje);
+  if (!venc || !prazo) return "none";
 
-  // Ciclo longo (ex.: 30 dias corridos): o status vem do prazo até o vencimento.
-  if (ciclo.tipo === "dias_corridos") {
-    const restantes = getDaysLeftInCycle(lot, hoje);
-    if (restantes === null) return "none";
-    if (restantes < 0) return "overdue";
-    if (restantes <= CICLO_AVISO_DIAS) return "upcoming";
-    return "preserved";
-  }
+  const dia = soData(hoje);
 
-  // Ciclo semanal (padrão).
-  const semanas = weeksSinceLastPreservation(lot, hoje);
-  if (semanas === null) return "none";
-  if (semanas <= 0) return "preserved";
-  if (semanas === 1) return "upcoming";
-  return "overdue";
+  // A semana do vencimento fechou sem preservação.
+  if (dia > prazo) return "overdue";
+
+  // Estamos DENTRO da semana do vencimento: é para fazer agora, e ainda há
+  // tempo até domingo.
+  if (dia >= startOfWeek(venc)) return "upcoming";
+
+  // Ainda antes da semana do vencimento. Avisa quando ela está próxima.
+  const diasAteASemana = calendarDaysBetween(dia, startOfWeek(venc));
+  if (diasAteASemana <= avisoDoCiclo(ref.prazoDias)) return "upcoming";
+
+  return ref.primeira ? "none" : "preserved";
 }
 
-/** Semanas fechadas sem registro. 0 quando o lote não está atrasado. */
-export function getLotOverdueWeeks(lot: Lot, hoje: Date = new Date()): number {
-  // Só faz sentido no ciclo semanal; num ciclo de 30 dias úteis o atraso é
-  // medido em dias, não em semanas perdidas.
-  if (getLotCycle(lot).tipo !== "semanal") return 0;
-  const semanas = weeksSinceLastPreservation(lot, hoje);
-  if (semanas === null || semanas < 2) return 0;
-  return semanas - 1;
-}
-
-/**
- * Dias restantes até o fim da semana de referência, contando hoje.
- *
- * Segunda devolve 7, domingo devolve 1. Substitui a contagem antiga até uma
- * data-alvo fixa: o que importa agora é quanto tempo resta no ciclo.
- */
-export function getDaysLeftInWeek(hoje: Date = new Date()): number {
-  const fim = endOfWeek(hoje);
-  const inicioDoDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-  return Math.round((fim.getTime() - inicioDoDia.getTime()) / MS_POR_DIA) + 1;
-}
-
-/** Cumpriu o ciclo da semana corrente. */
+/** Cumpriu o ciclo e está dentro do prazo. */
 export function isLotPreserved(lot: Lot, hoje: Date = new Date()): boolean {
   return getLotPreservationStatus(lot, hoje) === "preserved";
 }
 
-/** Semana aberta, ainda sem registro — há tempo, mas exige programação. */
+/** Vencimento próximo — exige programação. */
 export function isLotUpcoming(lot: Lot, hoje: Date = new Date()): boolean {
   return getLotPreservationStatus(lot, hoje) === "upcoming";
 }
@@ -414,9 +482,15 @@ export function getSilicaStatus(lot: Lot): SilicaStatus {
   return "ok";
 }
 
-export function addDays(_dateStr: string, _days?: number): string {
-  // Compatibilidade: agora retorna sempre a próxima segunda-feira após a data informada.
-  return nextMonday(_dateStr);
+/**
+ * Soma dias a uma data ISO e devolve a segunda-feira da semana resultante.
+ *
+ * Atalho para `proximaDataPrevista`, mantido pelos diálogos de preservação.
+ * Cuidado ao ler o nome: o retorno NÃO é `dateStr + days`, e sim a segunda da
+ * semana em que essa soma cai — que é a referência que o sistema registra.
+ */
+export function addDays(dateStr: string, days = FREQUENCIA_PADRAO_DIAS): string {
+  return proximaDataPrevista(dateStr, days);
 }
 
 export function addBusinessDays(dateStr: string, _days: number): string {

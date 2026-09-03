@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 
 const RETRYABLE_FETCH_RE = /networkerror|failed to fetch|load failed|fetch/i;
 const AUTH_ERROR_RE = /jwt|token|expired|not authenticated|401|permission denied for schema/i;

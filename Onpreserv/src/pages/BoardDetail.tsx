@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useTasks } from "@/context/TaskContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { Task, TaskHistoryEntry, isTaskOverdue, formatPrazo } from "@/types/task";
 import { computeBoardStats, sortByPriorityThenPrazo } from "@/lib/stats";
 import { TaskHistoryView } from "@/components/tasks/TaskHistoryView";

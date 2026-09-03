@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { useTasks } from "@/context/TaskContext";
 import { TaskSubtask } from "@/types/task";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   DndContext,

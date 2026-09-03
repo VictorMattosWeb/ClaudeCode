@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Task, TaskLabel, TaskComment, TaskHistoryEntry, TaskAttachment, TaskStatus, TaskSubtask, TaskBoard } from "@/types/task";
 import { toast } from "sonner";

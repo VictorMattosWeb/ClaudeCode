@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ChevronsUpDown, X } from "lucide-react";
+import { UserTag } from "@/components/UserTag";
 
 interface Props {
   value: string[];
@@ -67,7 +68,7 @@ export function UserMultiSelect({ value, onChange, placeholder = "Selecionar res
                     <div className={`h-4 w-4 rounded border flex items-center justify-center ${on ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}>
                       {on && <Check className="h-3 w-3" />}
                     </div>
-                    <span className="flex-1 text-left">{u.nome}</span>
+                    <UserTag userId={u.id} nome={u.nome} size={22} className="flex-1 text-left" />
                     {u.cargo && <span className="text-[10px] text-muted-foreground">{u.cargo}</span>}
                   </button>
                 </li>
@@ -79,8 +80,8 @@ export function UserMultiSelect({ value, onChange, placeholder = "Selecionar res
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((n) => (
-            <Badge key={n} variant="secondary" className="gap-1">
-              {n}
+            <Badge key={n} variant="secondary" className="gap-1 pl-1">
+              <UserTag nome={n} size={18} />
               <button type="button" onClick={() => remove(n)} aria-label={`Remover ${n}`}>
                 <X className="h-3 w-3" />
               </button>

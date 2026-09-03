@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { toast } from "sonner";
 import { ALL_MODULES, defaultPermissions, type AppModule, type AppRole } from "@/context/AuthContext";
 import { MODULE_LABELS, ROLE_LABELS } from "@/lib/permissions";

@@ -1,14 +1,6 @@
 import { CheckCircle2, Clock, AlertCircle, Minus, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  LotStatus,
-  Lot,
-  getLotPreservationStatus,
-  getLotOverdueWeeks,
-  getDaysLeftInWeek,
-  getLotCycle,
-  getDaysLeftInCycle,
-} from "@/types/lot";
+import { LotStatus, Lot, getLotPreservationStatus, getDaysLeftInCycle } from "@/types/lot";
 
 /**
  * Hierarquia de estado do lote.
@@ -24,40 +16,19 @@ import {
  *                       listagem principal no caso da sílica
  */
 
-/**
- * Rótulos por ciclo.
- *
- * "Semana cumprida" seria mentira num lote de ciclo mensal, e "Ciclo em dia"
- * perderia a precisão que a operação semanal ganhou. Cada ciclo tem o seu.
- */
-const LABELS: Record<"semanal" | "dias_corridos", Record<LotStatus, string>> = {
-  semanal: {
-    preserved: "Semana cumprida",
-    upcoming: "Semana aberta",
-    overdue: "Semana vencida",
-    none: "Sem preservação",
-  },
-  dias_corridos: {
-    preserved: "Ciclo em dia",
-    upcoming: "Renovar ciclo",
-    overdue: "Ciclo vencido",
-    none: "Sem preservação",
-  },
-};
-
 const CONFIG: Record<LotStatus, { label: string; className: string; Icon: typeof CheckCircle2 }> = {
   preserved: {
-    label: "Semana cumprida",
+    label: "Em dia",
     className: "border-success/40 bg-success/10 text-success",
     Icon: CheckCircle2,
   },
   upcoming: {
-    label: "Semana aberta",
+    label: "Vence em breve",
     className: "border-warning/40 bg-warning/10 text-warning",
     Icon: Clock,
   },
   overdue: {
-    label: "Semana vencida",
+    label: "Vencida",
     className: "border-destructive/40 bg-destructive/10 text-destructive",
     Icon: AlertCircle,
   },
@@ -85,28 +56,23 @@ export function LotStatusPill({
   className?: string;
 }) {
   const status = getLotPreservationStatus(lot);
-  const ciclo = getLotCycle(lot);
-  const { className: tone, Icon } = CONFIG[status];
-  const label = LABELS[ciclo.tipo][status];
+  const restantes = getDaysLeftInCycle(lot);
 
-  // O sufixo muda de sentido conforme o ciclo e o estado: no ciclo aberto o que
-  // importa é quanto tempo resta; no vencido, há quanto tempo se arrasta.
+  // O lote inativo não é cobrado, então não cai em nenhum dos quatro estados de
+  // preservação. Sem este rótulo próprio ele apareceria como "Sem preservação",
+  // o que é falso para um lote com histórico inteiro registrado — ele apenas
+  // deixou de exigir preservação.
+  const inativo = lot.status !== "ativo";
+  const { label, className: tone, Icon } = inativo
+    ? { label: "Inativo", className: "border-border bg-muted text-muted-foreground", Icon: Circle }
+    : CONFIG[status];
+
+  // O prazo é o que informa urgência: o rótulo sozinho não distingue vencido
+  // ontem de vencido há três meses, e é essa diferença que define a ordem de
+  // atendimento no campo.
   let suffix = "";
-  if (showDays) {
-    if (ciclo.tipo === "dias_corridos") {
-      const restantes = getDaysLeftInCycle(lot);
-      if (restantes !== null && status === "upcoming") {
-        suffix = ` · ${restantes}d`;
-      } else if (restantes !== null && status === "overdue") {
-        suffix = ` · ${Math.abs(restantes)}d de atraso`;
-      }
-    } else if (status === "upcoming") {
-      const dias = getDaysLeftInWeek();
-      suffix = ` · ${dias}d restante${dias === 1 ? "" : "s"}`;
-    } else if (status === "overdue") {
-      const semanas = getLotOverdueWeeks(lot);
-      suffix = ` · ${semanas} semana${semanas === 1 ? "" : "s"}`;
-    }
+  if (showDays && restantes !== null && status !== "preserved") {
+    suffix = restantes < 0 ? ` · há ${Math.abs(restantes)}d` : ` · ${restantes}d`;
   }
 
   return (

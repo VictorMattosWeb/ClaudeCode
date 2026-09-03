@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/services/adapters/supabase/client";
 import { ALL_MODULES, type AppModule, type AppRole } from "@/context/AuthContext";
 
 /**
