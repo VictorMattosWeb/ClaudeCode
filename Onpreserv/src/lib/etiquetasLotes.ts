@@ -7,7 +7,8 @@ import { getLotNextDueDate } from "@/types/lot";
  * -----------------------------------------------------------------------------
  * O formulário é PR-5290.00-22000-970-ST5-502 (FORM-PADRAO.Rev00) e NÃO pode
  * ser alterado: layout, textos fixos, cores e proporções são reproduzidos como
- * estão no modelo `etiqueta_example.xlsx`. Só dois campos são preenchidos.
+ * estão no modelo `referencias/etiqueta_example.xlsx`. Só dois campos são
+ * preenchidos.
  * -----------------------------------------------------------------------------
  *
  *   Descrição        ← `lot.name`  (rótulo e valor na mesma linha, no topo)

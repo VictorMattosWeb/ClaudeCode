@@ -1,5 +1,8 @@
 import "@testing-library/jest-dom";
 
+// Tudo aqui depende de DOM. Os testes de logica pura rodam em ambiente `node`
+// (ver vitest.config.ts), e sem o guard o setup quebraria neles.
+if (typeof window !== "undefined") {
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
@@ -13,6 +16,7 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+}
 
 // Shims necessários para Radix UI (Popover/Dialog) em JSDOM
 if (typeof window !== "undefined") {

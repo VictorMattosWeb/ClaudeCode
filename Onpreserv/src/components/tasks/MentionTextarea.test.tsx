@@ -1,9 +1,11 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
 import { useState } from "react";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import {
   MentionTextarea,
   extractMentionIds,
+  extractMentionIdsFromText,
   renderMentions,
 } from "./MentionTextarea";
 
@@ -61,6 +63,22 @@ function typeAt(el: HTMLTextAreaElement, value: string, caret = value.length) {
   if (caret !== value.length) el.setSelectionRange(caret, caret);
 }
 
+/**
+ * Os testes de autocomplete são SÍNCRONOS de propósito — sem `waitFor`, sem
+ * `findBy*`, sem `await`.
+ *
+ * Não é estilo: abrir o `Popover` do Radix em JSDOM bloqueia o event loop por
+ * cerca de 70 segundos nesta máquina (Windows, projeto no OneDrive). Medindo por
+ * dentro, o `fireEvent.change` que abre o autocomplete leva 164ms e o item já
+ * está no DOM quando ele retorna — mas o primeiro `setTimeout` depois disso só
+ * volta 70s mais tarde. Qualquer espera assíncrona fica presa aí: era o que
+ * fazia estes três testes falharem por tempo esgotado, sempre, enquanto os
+ * síncronos passavam.
+ *
+ * Como o React 18 aplica a atualização antes de `fireEvent` retornar, não há o
+ * que esperar: `getByText` logo após o evento verifica exatamente o mesmo
+ * comportamento, e em milissegundos.
+ */
 describe("MentionTextarea — autocomplete e seleção", () => {
   function Harness({
     onChangeSpy,
@@ -106,27 +124,22 @@ describe("MentionTextarea — autocomplete e seleção", () => {
     expect(screen.queryByText("Alice Souza")).toBeNull();
   });
 
-  it("abre o autocomplete e filtra usuários ao digitar @query", async () => {
+  it("abre o autocomplete e filtra usuários ao digitar @query", () => {
     const { textarea } = setup();
     typeAt(textarea, "oi @al");
-    expect(await screen.findByText("Alice Souza")).toBeInTheDocument();
+    expect(screen.getByText("Alice Souza")).toBeInTheDocument();
     expect(screen.getByText("Carla Alves")).toBeInTheDocument();
     expect(screen.queryByText("Bruno Lima")).toBeNull();
   });
 
-  it("ao clicar em um usuário insere o token e emite o id em onMentionsChange", async () => {
+  it("ao clicar em um usuário insere o token e emite o id em onMentionsChange", () => {
     const { textarea, onChange, onMentionsChange } = setup();
     typeAt(textarea, "oi @al", 6);
 
-    const item = await screen.findByText("Alice Souza");
-    act(() => {
-      fireEvent.mouseDown(item);
-    });
+    fireEvent.mouseDown(screen.getByText("Alice Souza"));
 
-    await waitFor(() => {
-      const lastValue = onChange.mock.calls.at(-1)?.[0] as string;
-      expect(lastValue).toContain("@Alice Souza ");
-    });
+    const lastValue = onChange.mock.calls.at(-1)?.[0] as string;
+    expect(lastValue).toContain("@Alice Souza ");
     const lastMentions = onMentionsChange.mock.calls.at(-1)?.[0];
     expect(lastMentions).toEqual([U1.id]);
   });
@@ -141,13 +154,27 @@ describe("MentionTextarea — autocomplete e seleção", () => {
     expect(last).toEqual([U1.id]);
   });
 
-  it("fecha o autocomplete ao apagar o gatilho @", async () => {
+  it("fecha o autocomplete ao apagar o gatilho @", () => {
     const { textarea } = setup();
     typeAt(textarea, "oi @al");
-    expect(await screen.findByText("Alice Souza")).toBeInTheDocument();
+    expect(screen.getByText("Alice Souza")).toBeInTheDocument();
     typeAt(textarea, "oi ");
-    await waitFor(() => {
-      expect(screen.queryByText("Alice Souza")).toBeNull();
-    });
+    expect(screen.queryByText("Alice Souza")).toBeNull();
+  });
+});
+
+describe("extractMentionIdsFromText - nomes com metacaracteres de regex", () => {
+  const PCM = { id: "44444444-4444-4444-4444-444444444444", nome: "J. Silva (PCM)" };
+
+  it("reconhece a mencao de um nome com ponto e parenteses", () => {
+    expect(extractMentionIdsFromText("@J. Silva (PCM) favor verificar", [PCM])).toEqual([PCM.id]);
+  });
+
+  it("nao casa um nome parecido so porque o padrao foi escapado", () => {
+    expect(extractMentionIdsFromText("@JXSilva XPCMY", [PCM])).toEqual([]);
+  });
+
+  it("continua reconhecendo nomes simples", () => {
+    expect(extractMentionIdsFromText("oi @Alice Souza", [U1])).toEqual([U1.id]);
   });
 });

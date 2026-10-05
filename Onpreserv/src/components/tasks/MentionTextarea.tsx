@@ -14,8 +14,15 @@ interface Props {
 // Formato antigo persistido: @[Nome](uuid). Mantido só para retro-compatibilidade na renderização.
 const LEGACY_MENTION_RE = /@\[([^\]]+)\]\(([0-9a-f-]{36})\)/g;
 
+/**
+ * Escapa os metacaracteres de regex de um nome de usuário.
+ *
+ * O substituto é `$&` — o trecho casado. Com `$1`, que era o que estava aqui,
+ * o resultado era o literal `$1` em vez do caractere escapado: um nome como
+ * "J. Silva (PCM)" virava um padrão quebrado e a menção nunca era reconhecida.
+ */
 function escapeRegex(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$1");
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** Extrai ids comparando trechos `@Nome` do texto contra a lista de usuários. */
