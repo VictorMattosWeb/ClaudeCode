@@ -61,7 +61,10 @@ describe("a data agendada no registro é respeitada", () => {
 
   it("vale o que estava agendado, não o recálculo pela frequência nova", () => {
     // Recalcular daria 24/08 + 15 = 08/09, empurrando um compromisso já firmado.
-    expect(getLotNextDueDate(lot)).toBe("2026-08-31");
+    // A data de hoje é explícita de propósito: a agendada só vale enquanto a
+    // semana dela não fechou, então sem fixar o dia este teste passaria em
+    // setembro e falharia em outubro.
+    expect(getLotNextDueDate(lot, dia("2026-09-02"))).toBe("2026-08-31");
   });
 
   it("sem data agendada, cai no cálculo pela frequência", () => {
@@ -82,8 +85,8 @@ describe("a semana do vencimento é o que define o cumprimento", () => {
   const lot = lote([pres("2026-08-24", "2026-08-31")]);
 
   it("o prazo real é o fim da semana do vencimento", () => {
-    expect(getLotDueDate(lot)).toEqual(dia("2026-08-31"));
-    expect(getLotDeadline(lot)).toEqual(dia("2026-09-06"));
+    expect(getLotDueDate(lot, dia("2026-09-02"))).toEqual(dia("2026-08-31"));
+    expect(getLotDeadline(lot, dia("2026-09-02"))).toEqual(dia("2026-09-06"));
   });
 
   it("dentro da semana do vencimento, cobra mas não acusa atraso", () => {

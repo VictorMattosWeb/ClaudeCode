@@ -90,8 +90,8 @@ describe("lote inativo fora do cálculo dos indicadores", () => {
     const emDia = lote({ id: "ok", preservations: [pres("2026-08-31", "2026-09-15")] });
     const inativo = lote({ id: "off", status: "inativo", preservations: ATRASADO });
     // Sozinho, o lote em dia dá 100%. O inativo não pode derrubar para 50%.
-    expect(computeLotStats([emDia]).taxaPreservacao).toBe(100);
-    expect(computeLotStats([emDia, inativo]).taxaPreservacao).toBe(100);
+    expect(computeLotStats([emDia], HOJE).taxaPreservacao).toBe(100);
+    expect(computeLotStats([emDia, inativo], HOJE).taxaPreservacao).toBe(100);
   });
 
   it("o total segue contando tudo que está na lista", () => {

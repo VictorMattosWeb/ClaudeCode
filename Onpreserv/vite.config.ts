@@ -10,6 +10,16 @@ export default defineConfig(() => ({
     hmr: {
       overlay: false,
     },
+    watch: {
+      // Pastas de ferramentas do agente, fora do código-fonte.
+      //
+      // Não é preferência: `.agents/skills` é um ponto de reparse do OneDrive
+      // (`Directory, ReparsePoint`), e o watcher do Vite morre ao percorrê-lo
+      // com `UNKNOWN: scandir, errno -4094` — derrubando o servidor inteiro na
+      // primeira reinicialização. `.claude/skills` são links simbólicos que
+      // apontam para lá, então precisam sair junto.
+      ignored: ["**/.agents/**", "**/.claude/**"],
+    },
   },
   plugins: [react()],
   resolve: {

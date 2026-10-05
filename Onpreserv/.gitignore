@@ -35,3 +35,12 @@ pnpm-debug.log*
 # Ferramentas de agente
 .agents/skills
 .claude/skills
+
+# Lockfiles de outros gerenciadores — o projeto usa npm.
+# O Vercel escolhe o gerenciador pelo lockfile presente, e bun.lockb tinha
+# precedência sobre package-lock.json: o deploy instalaria com Bun, resolvendo
+# uma árvore de dependências diferente da testada aqui.
+bun.lock
+bun.lockb
+yarn.lock
+pnpm-lock.yaml

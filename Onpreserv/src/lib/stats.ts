@@ -173,7 +173,7 @@ export interface LotStats {
  *   vencidos       — ao menos uma semana fechou vazia
  * As três são mutuamente exclusivas.
  */
-export function computeLotStats(lots: Lot[]): LotStats {
+export function computeLotStats(lots: Lot[], hoje: Date = new Date()): LotStats {
   // Só os ativos entram na conta. Um lote inativo não exige preservação, então
   // contá-lo em `semPreservacao` e no denominador da taxa apenas afundava o
   // indicador com material que ninguém precisa atender.
@@ -184,11 +184,13 @@ export function computeLotStats(lots: Lot[]): LotStats {
   let vencidos = 0;
   let semPreservacao = 0;
   for (const lot of ativos) {
-    const status = getLotPreservationStatus(lot);
+    // A data entra explícita: sem ela, a contagem depende do relógio e não há
+    // como testá-la de forma estável.
+    const status = getLotPreservationStatus(lot, hoje);
     if (status === "overdue") vencidos++;
     if (status === "none") semPreservacao++;
-    if (isLotPreserved(lot)) preservados++;
-    if (isLotUpcoming(lot)) upcoming++;
+    if (isLotPreserved(lot, hoje)) preservados++;
+    if (isLotUpcoming(lot, hoje)) upcoming++;
   }
   // `total` continua sendo tudo que está na lista — é o "Total de lotes" da
   // tela. Quem muda é o denominador da taxa: só os ativos, que são os que
