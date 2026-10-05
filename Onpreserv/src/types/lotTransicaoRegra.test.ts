@@ -86,19 +86,19 @@ describe("o exemplo da regra: teórica na quarta 02/09 vira segunda 31/08", () =
   });
 });
 
-describe("o lote de 15 dias segue como estava", () => {
+describe("o lote de ciclo padrão segue pela agenda enquanto ela vale", () => {
   const HOJE = dia("2026-09-02");
 
   it("a data agendada de 31/08 continua sendo respeitada", () => {
     const comum = lote("Painel PN-12", [pres("2026-08-24", "2026-08-31")]);
-    expect(getLotFrequencyDays(comum)).toBe(15);
+    expect(getLotFrequencyDays(comum)).toBe(21);
     expect(getLotNextDueDate(comum, HOJE)).toBe("2026-08-31");
     expect(getLotPreservationStatus(comum, HOJE)).toBe("upcoming");
   });
 
   it("passada a semana da agendada, a frequência assume", () => {
     const comum = lote("Painel PN-12", [pres("2026-08-24", "2026-08-31")]);
-    // 24/08 + 15 = terça 08/09; a semana dela abre em 07/09.
+    // O ciclo de 24/08 encerra na semana que abre em 07/09.
     expect(getLotNextDueDate(comum, dia("2026-09-08"))).toBe("2026-09-07");
   });
 

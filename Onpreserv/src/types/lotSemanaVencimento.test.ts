@@ -60,7 +60,7 @@ describe("a data agendada no registro é respeitada", () => {
   const lot = lote([pres("2026-08-24", "2026-08-31")]);
 
   it("vale o que estava agendado, não o recálculo pela frequência nova", () => {
-    // Recalcular daria 24/08 + 15 = 08/09, empurrando um compromisso já firmado.
+    // Recalcular daria 24/08 + 21 = 14/09, empurrando um compromisso já firmado.
     // A data de hoje é explícita de propósito: a agendada só vale enquanto a
     // semana dela não fechou, então sem fixar o dia este teste passaria em
     // setembro e falharia em outubro.
@@ -68,13 +68,14 @@ describe("a data agendada no registro é respeitada", () => {
   });
 
   it("sem data agendada, cai no cálculo pela frequência", () => {
-    // 24/08 + 15 = terça 08/09; a semana dela abre em 07/09.
+    // O ciclo de 24/08 vai até 13/09 e encerra na semana que abre em 07/09.
     expect(getLotNextDueDate(lote([pres("2026-08-24")]))).toBe("2026-09-07");
   });
 
-  it("a partir dali, o passo é de 15 dias", () => {
-    // Feita a preservação de 31/08, a teórica é 15/09 (terça): semana de 14/09.
-    expect(proximaDataPrevista("2026-08-31", 15)).toBe("2026-09-14");
+  it("a partir dali, o passo é de 21 dias", () => {
+    // Preservado na segunda 31/08, o ciclo vai até domingo 20/09 e encerra na
+    // semana que abre em 14/09 — a terceira contando a da própria preservação.
+    expect(proximaDataPrevista("2026-08-31", 21)).toBe("2026-09-14");
     const seguinte = lote([pres("2026-08-31", "2026-09-14")]);
     expect(getLotNextDueDate(seguinte)).toBe("2026-09-14");
   });
@@ -116,10 +117,9 @@ describe("a semana do vencimento é o que define o cumprimento", () => {
   it("fechada a semana da agendada, a frequência assume o cálculo", () => {
     // Este lote foi preservado em 24/08 e tinha 31/08 agendado pela regra
     // semanal antiga. Em 07/09 aquela semana fechou, e a data deixa de valer:
-    // pela frequência de 15 dias, a teórica é 24/08 + 15 = 08/09, cuja semana
-    // abre justamente em 07/09.
+    // pela frequência de 21 dias, o ciclo de 24/08 encerra na semana de 07/09.
     //
-    // É o mesmo mecanismo que faz o PN de 03/08 vencer em 02/09 em vez de
+    // É o mesmo mecanismo que faz o PN de 03/08 vencer em 31/08 em vez de
     // aparecer atrasado desde agosto por causa de uma agenda da regra velha.
     expect(getLotNextDueDate(lot, dia("2026-09-07"))).toBe("2026-09-07");
     expect(getLotPreservationStatus(lot, dia("2026-09-07"))).toBe("upcoming");
@@ -129,7 +129,7 @@ describe("a semana do vencimento é o que define o cumprimento", () => {
     // A partir daqui, todo registro grava `nextDate` = data + frequência, então
     // a agendada e o cálculo coincidem — e a volta pela frequência devolve a
     // mesma data. Um lote que passou da semana continua vencido.
-    const novo = lote([pres("2026-08-10", "2026-08-24")]); // 10/08 + 15 = 25/08 -> semana de 24/08
+    const novo = lote([pres("2026-08-10", "2026-08-24")]); // ciclo de 10/08 encerra na semana de 24/08
     expect(getLotNextDueDate(novo, dia("2026-09-07"))).toBe("2026-08-24");
     expect(getLotPreservationStatus(novo, dia("2026-09-07"))).toBe("overdue");
   });
@@ -155,10 +155,11 @@ describe("addDays deixou de mentir", () => {
   });
 
   it("o intervalo muda de semana quando deve, e só então", () => {
-    // 20/08 + 15 = sexta 04/09 e 21/08 + 15 = sábado 05/09: mesma semana, a
-    // de 31/08. Já 23/08 + 15 = segunda 07/09, que abre a semana seguinte.
+    // O ciclo de 15 dias iniciado em 20/08 fecha em quinta 03/09 e em 21/08
+    // fecha em sexta 04/09: as duas na semana de 31/08. Já o de 24/08 fecha em
+    // segunda 07/09, que abre a semana seguinte.
     expect(addDays("2026-08-20", 15)).toBe("2026-08-31");
     expect(addDays("2026-08-21", 15)).toBe("2026-08-31");
-    expect(addDays("2026-08-23", 15)).toBe("2026-09-07");
+    expect(addDays("2026-08-24", 15)).toBe("2026-09-07");
   });
 });

@@ -53,14 +53,15 @@ export type LotStatus = "preserved" | "upcoming" | "overdue" | "none";
 //   2. Registrada a primeira, ela passa a ser a referência: cada preservação
 //      define o prazo da seguinte.
 //
-//   3. A frequência recorrente é de 15 DIAS por padrão — o que antes era ciclo
-//      semanal. Os itens de 30 dias (PN-32, PN-34, PN-36 e os configurados na
-//      ficha do lote) permanecem em 30.
+//   3. A frequência recorrente é de 21 DIAS por padrão — três semanas. Os
+//      painéis retirados de campo (PN-32, PN-34, PN-36) e os lotes com
+//      frequência configurada na ficha seguem em 30 dias.
 //
-//   4. A data prevista é sempre a SEGUNDA-FEIRA da semana em que a data
-//      teórica cai. A frequência é respeitada como sempre; o que se registra e
-//      se exibe é a semana, não o dia. Preservar em qualquer dia daquela semana
-//      cumpre o ciclo — ver `proximaDataPrevista`.
+//   4. O ciclo conta a partir da SEMANA da preservação, não do dia. Preservou
+//      em qualquer dia da semana de 14/09? A próxima é a semana de 28/09 —
+//      três semanas, contando a da própria preservação. A data exibida é a
+//      segunda-feira dessa semana, e preservar em qualquer dia dela cumpre o
+//      ciclo. Ver `semanaDeCobranca`.
 //
 // Os quatro status continuam os mesmos — `preserved`, `upcoming`, `overdue` e
 // `none`. O que mudou foi apenas como são calculados.
@@ -82,16 +83,29 @@ export const PRAZO_PRIMEIRA_PRESERVACAO_DIAS = 7;
  * de um dia para o outro — a cobrança não existia quando ele entrou, e o
  * quadro amanheceria vermelho sem que nada tivesse acontecido no campo.
  *
- * Para os lotes anteriores, mudou apenas a frequência: de semanal para 15 dias.
+ * Para os lotes anteriores, mudou apenas a frequência recorrente.
  * Enquanto não tiverem a primeira preservação, seguem em "sem preservação",
  * como antes.
  */
 export const REGRA_PRIMEIRA_PRESERVACAO_DESDE = "2026-09-02";
 
-/** Frequência recorrente padrão, em dias corridos. */
-export const FREQUENCIA_PADRAO_DIAS = 15;
+/**
+ * Frequência recorrente padrão, em dias corridos.
+ *
+ * Vinte e um dias são exatamente três semanas. Como a cobrança é por semana e
+ * não por dia, um múltiplo de sete mantém o vencimento sempre no mesmo dia da
+ * semana da preservação anterior, e a data prevista cai limpa na segunda-feira
+ * da terceira semana seguinte — sem os deslocamentos que um ciclo de 15 dias
+ * produzia a cada rodada.
+ */
+export const FREQUENCIA_PADRAO_DIAS = 21;
 
-/** Frequência dos itens de ciclo longo. */
+/**
+ * Frequência dos painéis retirados de campo (PN-32, PN-34, PN-36).
+ *
+ * Não acompanhou a mudança para 21 dias: esses painéis já vinham em 30 e a
+ * fiscalização os mantém assim.
+ */
 export const FREQUENCIA_LONGA_DIAS = 30;
 
 /** Teto da antecedência do aviso de vencimento. */
@@ -145,7 +159,7 @@ export function calendarDaysBetween(inicio: Date, fim: Date): number {
  *
  * Cinco dias fixos avisariam cedo demais num prazo de 7 dias — o lote nasceria
  * quase em alerta. Um terço do ciclo, limitado a cinco dias, dá 3 para o prazo
- * inicial, 5 para o de 15 e 5 para o de 30.
+ * inicial e 5 tanto para o ciclo de 21 quanto para o de 30.
  */
 export function avisoDoCiclo(dias: number): number {
   return Math.min(CICLO_AVISO_MAXIMO_DIAS, Math.ceil(dias / 3));
@@ -226,6 +240,7 @@ export function getLotCycle(lot: Lot): CicloPreservacao {
 export const FREQUENCIA_OPCOES: { valor: number | null; label: string }[] = [
   { valor: null, label: `${FREQUENCIA_PADRAO_DIAS} dias (padrão)` },
   { valor: 7, label: "7 dias" },
+  { valor: 15, label: "15 dias" },
   { valor: 30, label: "30 dias" },
   { valor: 60, label: "60 dias" },
   { valor: 90, label: "90 dias" },
@@ -284,9 +299,10 @@ export function getLotCycleReference(lot: Lot): ReferenciaCiclo | null {
  * sistema identifica a semana em que ela cai e usa a segunda-feira dessa semana
  * como referência.
  *
- *   última preservação 24/08  →  +15 dias  →  teórica: quarta 09/09
- *   semana da teórica: segunda 07/09 a domingo 13/09
- *   próxima preservação: 07/09
+ *   última preservação: segunda 14/09
+ *   o ciclo de 21 dias vai de 14/09 a domingo 04/10 — o ÚLTIMO dia dele
+ *   semana desse último dia: segunda 28/09 a domingo 04/10
+ *   próxima preservação: 28/09
  *
  * Preservar em qualquer dia de 07/09 a 13/09 cumpre o ciclo. Assim a
  * preservação deixa de ser cobrada por um dia exato e passa a ser cobrada por
@@ -296,8 +312,35 @@ export function getLotCycleReference(lot: Lot): ReferenciaCiclo | null {
  * regra anterior aplicava deixou de ter efeito aqui.
  */
 export function proximaDataPrevista(dataIso: string, frequenciaDias: number): string {
-  const teorica = addCalendarDays(parseLocalDate(dataIso), frequenciaDias);
-  return toIso(startOfWeek(teorica));
+  return toIso(semanaDeCobranca(parseLocalDate(dataIso), frequenciaDias));
+}
+
+/**
+ * Semana em que a próxima preservação é cobrada.
+ *
+ * -----------------------------------------------------------------------------
+ * O ciclo conta a partir da SEMANA da preservação, nunca do dia dela.
+ * -----------------------------------------------------------------------------
+ *
+ * Preservar na segunda ou na sexta da mesma semana dá o mesmo resultado: as
+ * duas pertencem à mesma semana, e é a semana que manda. Sem ancorar, o dia
+ * escolhido dentro da semana deslocava a cobrança, e dois lotes preservados na
+ * mesma passagem da equipe podiam vencer em semanas diferentes.
+ *
+ * Com 21 dias — três semanas — o ciclo iniciado em qualquer dia da semana de
+ * 14/09 vai de 14/09 a domingo 04/10 e encerra na semana que abre em 28/09:
+ *
+ *   semana 1: 14/09 a 20/09   ← a preservação aconteceu em algum dia daqui
+ *   semana 2: 21/09 a 27/09
+ *   semana 3: 28/09 a 04/10   ← a cobrança é aqui
+ *
+ * O `- 1` existe porque o primeiro dia da semana da preservação já conta como
+ * dia 1 do ciclo. Sem ele o resultado seria 05/10, o primeiro dia DEPOIS do
+ * intervalo, e a cobrança cairia numa quarta semana que o ciclo nem alcança.
+ */
+function semanaDeCobranca(referencia: Date, dias: number): Date {
+  const inicio = startOfWeek(referencia);
+  return startOfWeek(addCalendarDays(inicio, Math.max(0, dias - 1)));
 }
 
 /**
@@ -317,8 +360,12 @@ export function getLotDueDate(lot: Lot, hoje: Date = new Date()): Date | null {
   const ref = getLotCycleReference(lot);
   if (!ref) return null;
 
-  // Segunda-feira da semana em que a data teórica cai. Ver `proximaDataPrevista`.
-  const pelaFrequencia = startOfWeek(addCalendarDays(ref.data, ref.prazoDias));
+  // A primeira preservação conta da CHEGADA do material: ali não existe semana
+  // de preservação para ancorar, e ancorar na semana da chegada encurtaria o
+  // prazo de quem recebe numa sexta para dois dias.
+  const pelaFrequencia = ref.primeira
+    ? startOfWeek(addCalendarDays(ref.data, Math.max(0, ref.prazoDias - 1)))
+    : semanaDeCobranca(ref.data, ref.prazoDias);
   if (ref.primeira) return pelaFrequencia;
 
   const agendada = ultimaPreservacaoRegistro(lot)?.nextDate;

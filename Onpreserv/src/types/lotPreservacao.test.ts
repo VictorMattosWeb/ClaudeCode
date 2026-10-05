@@ -54,10 +54,10 @@ function lote(over: Partial<Lot> = {}, datas: string[] = [], chegada = "2026-08-
 const CHEGADA = "2026-09-07";
 
 describe("frequência do lote", () => {
-  it("o padrão passou de semanal para 15 dias", () => {
-    expect(FREQUENCIA_PADRAO_DIAS).toBe(15);
-    expect(getLotFrequencyDays(lote())).toBe(15);
-    expect(getLotCycle(lote()).label).toBe("15 dias");
+  it("o padrão é de 21 dias — três semanas", () => {
+    expect(FREQUENCIA_PADRAO_DIAS).toBe(21);
+    expect(getLotFrequencyDays(lote())).toBe(21);
+    expect(getLotCycle(lote()).label).toBe("21 dias");
   });
 
   it("os itens de 30 dias permanecem em 30", () => {
@@ -72,12 +72,12 @@ describe("frequência do lote", () => {
   });
 
   it("'null' é escolha de administrador e vale o padrão, sem consultar a lista", () => {
-    expect(getLotFrequencyDays(lote({ name: "Painel PN-34", frequenciaDias: null }))).toBe(15);
+    expect(getLotFrequencyDays(lote({ name: "Painel PN-34", frequenciaDias: null }))).toBe(21);
   });
 
   it("não confunde identificadores com números maiores", () => {
     for (const nome of ["PN-320", "PN-345", "PN-360"]) {
-      expect(getLotFrequencyDays(lote({ name: `Painel ${nome}` })), nome).toBe(15);
+      expect(getLotFrequencyDays(lote({ name: `Painel ${nome}` })), nome).toBe(21);
     }
   });
 });
@@ -92,12 +92,15 @@ describe("primeira preservação — 7 dias da chegada", () => {
   });
 
   it("vence 7 dias após a chegada", () => {
-    // 07/09 + 7 = 14/09/2026, uma segunda-feira.
-    expect(getLotNextDueDate(lote({}, [], CHEGADA))).toBe("2026-09-14");
+    // Chegou na segunda 07/09: o prazo de 7 dias vai até domingo 13/09, e a
+    // cobrança é na própria semana da chegada.
+    expect(getLotNextDueDate(lote({}, [], CHEGADA))).toBe("2026-09-07");
   });
 
-  it("recém-chegado fica em 'sem preservação', sem alarme", () => {
-    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-08"))).toBe("none");
+  it("recém-chegado, antes da semana do prazo, fica em 'sem preservação'", () => {
+    // Chegando na segunda 07/09, a semana do prazo é a própria — então já no
+    // dia seguinte ele aparece como cobrado. O estado "none" é o de antes.
+    expect(getLotPreservationStatus(lote({}, [], "2026-09-14T09:00:00.000Z"), dia("2026-09-08"))).toBe("none");
   });
 
   it("passa a cobrar quando o prazo se aproxima", () => {
@@ -107,12 +110,12 @@ describe("primeira preservação — 7 dias da chegada", () => {
   });
 
   it("vira vencida só quando a semana do vencimento fecha", () => {
-    // Vencimento em 14/09, uma segunda: a semana vai até domingo 20/09.
+    // Chegou em 07/09; a semana do prazo vai de 07/09 a domingo 13/09.
     // Passar do dia não basta — a preservação ainda pode ser feita na semana.
-    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-14"))).toBe("upcoming");
-    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-18"))).toBe("upcoming");
-    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-20"))).toBe("upcoming");
-    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-21"))).toBe("overdue");
+    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-09"))).toBe("upcoming");
+    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-11"))).toBe("upcoming");
+    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-13"))).toBe("upcoming");
+    expect(getLotPreservationStatus(lote({}, [], CHEGADA), dia("2026-09-14"))).toBe("overdue");
   });
 
   it("nunca fica em 'preservado' antes de existir preservação", () => {
@@ -149,10 +152,11 @@ describe("a regra da 1ª preservação vale só para o material novo", () => {
   });
 
   it("lote antigo COM preservação segue a frequência normalmente", () => {
-    // Para os que já existiam, o que mudou foi só a frequência: 15 dias.
+    // Para os que já existiam, o que mudou foi só a frequência recorrente.
     const lot = lote({}, ["2026-09-10"], ANTES);
-    expect(getLotFrequencyDays(lot)).toBe(15);
-    // 10/09 + 15 = sexta 25/09; a referência é a segunda daquela semana.
+    expect(getLotFrequencyDays(lot)).toBe(21);
+    // Preservado em 10/09 — semana de 07/09 —, a cobrança é duas semanas
+    // adiante: a semana que abre em 21/09.
     expect(getLotNextDueDate(lot)).toBe("2026-09-21");
     expect(getLotPreservationStatus(lot, dia("2026-09-11"))).toBe("preserved");
   });
@@ -169,11 +173,12 @@ describe("preservações seguintes — a última vira a referência", () => {
     const ref = getLotCycleReference(lot)!;
     expect(ref.primeira).toBe(false);
     expect(ref.data).toEqual(dia("2026-09-10"));
-    expect(ref.prazoDias).toBe(15);
+    expect(ref.prazoDias).toBe(21);
   });
 
-  it("15 dias depois do registro, na segunda daquela semana", () => {
-    // 10/09 + 15 = sexta 25/09; a semana dela abre em 21/09.
+  it("a cobrança é duas semanas após a semana do registro", () => {
+    // 10/09 cai na semana de 07/09; com 21 dias (três semanas contando a
+    // própria), a cobrança é na semana que abre em 21/09.
     expect(getLotNextDueDate(lote({}, ["2026-09-10"]))).toBe("2026-09-21");
   });
 
@@ -190,17 +195,21 @@ describe("preservações seguintes — a última vira a referência", () => {
   it("logo após preservar, está em dia", () => {
     const lot = lote({}, ["2026-09-10"]);
     expect(getLotPreservationStatus(lot, dia("2026-09-11"))).toBe("preserved");
-    // Conta até o FIM da semana do vencimento (domingo 27/09), não até o dia.
+    // Vencimento na semana de 21/09; conta até o FIM dela (domingo 27/09).
     expect(getDaysLeftInCycle(lot, dia("2026-09-11"))).toBe(16);
   });
 
   it("avisa quando a semana do vencimento se aproxima e vence quando ela fecha", () => {
-    // Vencimento em 25/09 (sexta); a semana vai de 21/09 a domingo 27/09.
+    // 10/09 cai na semana de 07/09; a semana do vencimento vai de 21/09 a 27/09.
     const lot = lote({}, ["2026-09-10"]);
-    expect(avisoDoCiclo(15)).toBe(5);
-    expect(getLotPreservationStatus(lot, dia("2026-09-18"))).toBe("upcoming");
-    expect(getLotPreservationStatus(lot, dia("2026-09-25"))).toBe("upcoming");
+    expect(avisoDoCiclo(21)).toBe(5);
+    // Cinco dias antes de a semana abrir, o aviso começa.
+    expect(getLotPreservationStatus(lot, dia("2026-09-15"))).toBe("preserved");
+    expect(getLotPreservationStatus(lot, dia("2026-09-16"))).toBe("upcoming");
+    // Dentro da semana, cobra sem acusar atraso — em qualquer dia dela.
+    expect(getLotPreservationStatus(lot, dia("2026-09-21"))).toBe("upcoming");
     expect(getLotPreservationStatus(lot, dia("2026-09-27"))).toBe("upcoming");
+    // Fechada a semana sem registro, vence.
     expect(getLotPreservationStatus(lot, dia("2026-09-28"))).toBe("overdue");
   });
 
@@ -251,7 +260,7 @@ describe("aritmética de dias corridos", () => {
 
   it("o aviso é um terço do ciclo, limitado a cinco dias", () => {
     expect(avisoDoCiclo(7)).toBe(3);
-    expect(avisoDoCiclo(15)).toBe(5);
+    expect(avisoDoCiclo(21)).toBe(5);
     expect(avisoDoCiclo(30)).toBe(5);
     expect(avisoDoCiclo(90)).toBe(5);
   });

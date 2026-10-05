@@ -85,9 +85,12 @@ describe("a data prevista é sempre a segunda-feira da semana", () => {
     expect(proximaDataPrevista("2026-08-28", 30)).toBe("2026-09-21");
   });
 
-  it("teórica na própria segunda não se move", () => {
-    // 22/08 + 30 = segunda 21/09.
-    expect(proximaDataPrevista("2026-08-22", 30)).toBe("2026-09-21");
+  it("o PN de 30 dias é cobrado quatro semanas após a da preservação", () => {
+    // 24/08 abre a semana; 30 dias a partir dela vão até 22/09, que cai na
+    // semana de 21/09.
+    expect(proximaDataPrevista("2026-08-24", 30)).toBe("2026-09-21");
+    // Qualquer outro dia da mesma semana dá o mesmo resultado.
+    expect(proximaDataPrevista("2026-08-28", 30)).toBe("2026-09-21");
   });
 
   it("toda data prevista cai numa segunda-feira, em 90 partidas seguidas", () => {
@@ -133,13 +136,13 @@ describe("a semana do vencimento também vale para os PN", () => {
   });
 });
 
-describe("os PN não são afetados pela mudança para 15 dias", () => {
-  it("um lote comum vai a 15 dias, o PN continua em 30", () => {
+describe("os PN não são afetados pela mudança para 21 dias", () => {
+  it("um lote comum vai a 21 dias, o PN continua em 30", () => {
     const comum = pn("Painel PN-12", [pres("2026-09-10")]);
     const longo = pn("Painel PN-34", [pres("2026-09-10")]);
-    expect(getLotFrequencyDays(comum)).toBe(15);
+    expect(getLotFrequencyDays(comum)).toBe(21);
     expect(getLotFrequencyDays(longo)).toBe(30);
-    // 10/09 + 15 = sexta 25/09 -> semana de 21/09.
+    // 10/09 cai na semana de 07/09: com 21 dias, cobra na semana de 21/09.
     expect(getLotNextDueDate(comum)).toBe("2026-09-21");
     // 10/09 + 30 = sábado 10/10 -> semana de 05/10.
     expect(getLotNextDueDate(longo)).toBe("2026-10-05");

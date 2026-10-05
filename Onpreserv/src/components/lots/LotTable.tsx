@@ -23,6 +23,7 @@ import { RowDeleteAction } from "@/components/RowDeleteAction";
 import { ImportDialog } from "@/components/ImportDialog";
 import { BulkPreservationDialog } from "@/components/BulkPreservationDialog";
 import { ExportMenu } from "@/components/ExportMenu";
+import { EtiquetasMenu } from "@/components/lots/EtiquetasMenu";
 import { exportLotsXlsx } from "@/lib/exportLots";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -154,6 +155,7 @@ export function LotTable({ filters, onFiltersChange, filteredLots, loading = fal
           <span className="font-hud text-[9px] text-primary/70">LOT_01</span>
         </div>
         <div className="flex flex-wrap gap-2">
+          <EtiquetasMenu filteredLots={sortedLots} selectedLots={lots.filter((l) => selected.has(l.id))} />
           <ExportMenu filteredLots={sortedLots} selectedLots={lots.filter((l) => selected.has(l.id))} />
           {isAdmin && (
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
