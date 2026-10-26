@@ -19,6 +19,8 @@ interface MetricCardProps {
   value: string | number;
   /** Contexto obrigatório para KPI de destaque: "X de Y", "meta 90%", etc. */
   context?: string;
+  /** Segunda linha de contexto, em destaque de alerta. */
+  footnote?: string;
   tone?: MetricTone;
   /** 0–100. Desenha a barra de progresso sob o valor. */
   progress?: number;
@@ -41,6 +43,7 @@ export function MetricCard({
   label,
   value,
   context,
+  footnote,
   tone = "neutral",
   progress,
   info,
@@ -107,6 +110,10 @@ export function MetricCard({
 
       {context && (
         <p className="mt-2 truncate text-[11px] text-muted-foreground">{context}</p>
+      )}
+
+      {footnote && !loading && (
+        <p className="mt-0.5 truncate text-[11px] font-medium text-destructive">{footnote}</p>
       )}
     </article>
   );

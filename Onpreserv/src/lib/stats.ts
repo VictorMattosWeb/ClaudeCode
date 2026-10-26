@@ -1,6 +1,6 @@
 import { Task, TaskStatus, TaskPriority, TaskBoard, TASK_STATUS_ORDER, isTaskOverdue } from "@/types/task";
 import type { Lot } from "@/types/lot";
-import { getLotPreservationStatus, isLotPreserved, isLotUpcoming } from "@/types/lot";
+import { getLotOverdueWeeks, getLotPreservationStatus, isLotPreserved, isLotUpcoming } from "@/types/lot";
 
 /** Peso de prioridade para ordenação (maior = mais urgente). */
 export const PRIORITY_WEIGHT: Record<TaskPriority, number> = {
@@ -161,6 +161,12 @@ export interface LotStats {
   preservados: number; // inclui upcoming
   upcoming: number;
   vencidos: number;
+  /**
+   * Soma das semanas fechadas sem preservação de todos os lotes vencidos.
+   * Um lote vencido há três semanas pesa três — mede o tamanho do atraso, e
+   * não apenas quantos lotes estão nele.
+   */
+  vencidosAcumulados: number;
   semPreservacao: number;
   /** % preservados sobre os ATIVOS (0..100, inteiro). */
   taxaPreservacao: number;
@@ -182,12 +188,16 @@ export function computeLotStats(lots: Lot[], hoje: Date = new Date()): LotStats 
   let preservados = 0;
   let upcoming = 0;
   let vencidos = 0;
+  let vencidosAcumulados = 0;
   let semPreservacao = 0;
   for (const lot of ativos) {
     // A data entra explícita: sem ela, a contagem depende do relógio e não há
     // como testá-la de forma estável.
     const status = getLotPreservationStatus(lot, hoje);
-    if (status === "overdue") vencidos++;
+    if (status === "overdue") {
+      vencidos++;
+      vencidosAcumulados += getLotOverdueWeeks(lot, hoje);
+    }
     if (status === "none") semPreservacao++;
     if (isLotPreserved(lot, hoje)) preservados++;
     if (isLotUpcoming(lot, hoje)) upcoming++;
@@ -204,6 +214,7 @@ export function computeLotStats(lots: Lot[], hoje: Date = new Date()): LotStats 
     preservados,
     upcoming,
     vencidos,
+    vencidosAcumulados,
     semPreservacao,
     taxaPreservacao,
   };

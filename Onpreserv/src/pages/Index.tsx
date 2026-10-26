@@ -71,7 +71,13 @@ const Index = () => {
               ? `de ${lots.length} cadastrados`
               : `${stats.ativos} sob preservação`
           }
+          footnote={
+            stats.vencidosAcumulados > 0
+              ? `${stats.vencidosAcumulados} ${stats.vencidosAcumulados === 1 ? "vencido acumulado" : "vencidos acumulados"}`
+              : undefined
+          }
           loading={loading}
+          info="Vencidos acumulados: soma das semanas que já fecharam sem preservação em cada lote vencido. Um lote atrasado há três semanas conta três; a semana corrente não entra, porque ainda pode ser cumprida."
         />
         <MetricCard
           icon={CheckCircle2}
