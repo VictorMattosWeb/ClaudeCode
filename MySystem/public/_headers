@@ -1,0 +1,10 @@
+# Cabeçalhos servidos pela Cloudflare para todos os arquivos.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Arquivos do build têm hash no nome: podem ficar em cache por 1 ano.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

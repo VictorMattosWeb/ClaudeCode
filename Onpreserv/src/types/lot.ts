@@ -476,6 +476,20 @@ export function getLotPreservationStatus(lot: Lot, hoje: Date = new Date()): Lot
   return ref.primeira ? "none" : "preserved";
 }
 
+/**
+ * Semanas que já fecharam sem preservação, contando a do vencimento.
+ *
+ * Vencido na semana de 12/10 e hoje na de 19/10: uma semana. A semana corrente
+ * não entra — ela ainda está aberta e pode ser cumprida. Zero para quem não
+ * está vencido.
+ */
+export function getLotOverdueWeeks(lot: Lot, hoje: Date = new Date()): number {
+  if (getLotPreservationStatus(lot, hoje) !== "overdue") return 0;
+  const venc = getLotDueDate(lot, hoje);
+  if (!venc) return 0;
+  return Math.max(1, Math.round(calendarDaysBetween(startOfWeek(venc), startOfWeek(hoje)) / 7));
+}
+
 /** Cumpriu o ciclo e está dentro do prazo. */
 export function isLotPreserved(lot: Lot, hoje: Date = new Date()): boolean {
   return getLotPreservationStatus(lot, hoje) === "preserved";
